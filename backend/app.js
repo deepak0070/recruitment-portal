@@ -56,8 +56,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// API Routes will be mounted here in future milestones
-// app.use('/api', apiRoutes);
+// API Routes
+const apiRoutes = require('./routes');
+app.use('/api', apiRoutes);
 
 // Catch 404 routes
 app.use('*', (req, res, next) => {
