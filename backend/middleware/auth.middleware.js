@@ -49,7 +49,34 @@ function authorize(...roles) {
   };
 }
 
+/**
+ * Optional authentication - attaches user if token is valid, proceeds without error if not
+ */
+async function optionalAuthenticate(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, config.jwt.secret);
+          const user = await UserModel.findById(decoded.id);
+          if (user) {
+            req.user = user;
+          }
+        } catch (e) {
+          // Ignore invalid token on optional auth
+        }
+      }
+    }
+    next();
+  } catch (error) {
+    next();
+  }
+}
+
 module.exports = {
   authenticate,
-  authorize
+  authorize,
+  optionalAuthenticate
 };
