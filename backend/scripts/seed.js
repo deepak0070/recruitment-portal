@@ -3,6 +3,16 @@ const mysql = require('mysql2/promise');
 const mongoose = require('mongoose');
 const config = require('../config');
 
+function formatError(error) {
+  if (error.code === 'ECONNREFUSED' || (error.errors && error.errors.some(e => e.code === 'ECONNREFUSED'))) {
+    return `Could not connect to MySQL at ${config.mysql.host}:${config.mysql.port} (Connection Refused).\n👉 Please verify that your MySQL server is running (e.g. via XAMPP, MySQL Service, or Docker), or check DB_HOST / DB_PORT in backend/.env.`;
+  }
+  if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+    return `Access denied for user '${config.mysql.user}'@'${config.mysql.host}'.\n👉 Please verify DB_USER and DB_PASSWORD in your backend/.env file.`;
+  }
+  return error.message || error.code || String(error);
+}
+
 async function seed() {
   console.log('--- Seeding Database with Initial Data ---');
   let connection;
@@ -134,10 +144,8 @@ async function seed() {
       await mongoose.disconnect();
     } catch (mErr) {
       console.log(`ℹ️ MongoDB seeding skipped (${mErr.message}) - will seed when Mongo is running.`);
-    }
-
   } catch (error) {
-    console.error('❌ Seeding error:', error.message);
+    console.error('\n❌ Seeding error:\n' + formatError(error) + '\n');
     process.exitCode = 1;
   } finally {
     if (connection) {

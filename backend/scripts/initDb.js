@@ -3,6 +3,16 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 const config = require('../config');
 
+function formatError(error) {
+  if (error.code === 'ECONNREFUSED' || (error.errors && error.errors.some(e => e.code === 'ECONNREFUSED'))) {
+    return `Could not connect to MySQL at ${config.mysql.host}:${config.mysql.port} (Connection Refused).\n👉 Please verify that your MySQL server is running (e.g. via XAMPP, MySQL Windows Service, or Docker), or check DB_HOST / DB_PORT in backend/.env.`;
+  }
+  if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+    return `Access denied for user '${config.mysql.user}'@'${config.mysql.host}'.\n👉 Please verify DB_USER and DB_PASSWORD in your backend/.env file.`;
+  }
+  return error.message || error.code || String(error);
+}
+
 async function initDb() {
   console.log('--- Initializing MySQL Database ---');
   let connection;
@@ -25,7 +35,7 @@ async function initDb() {
 
     console.log('✅ Database schema created/verified successfully!');
   } catch (error) {
-    console.error('❌ Database initialization error:', error.message);
+    console.error('\n❌ Database initialization error:\n' + formatError(error) + '\n');
     process.exitCode = 1;
   } finally {
     if (connection) {
