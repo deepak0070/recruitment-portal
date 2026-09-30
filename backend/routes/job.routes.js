@@ -51,7 +51,7 @@ router.post(
   '/:id/apply',
   authenticate,
   authorize('candidate'),
-  uploadResume.single('resume'),
+  uploadResume,
   applyJobValidator,
   validateRequest,
   ApplicationController.apply

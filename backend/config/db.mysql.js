@@ -19,12 +19,21 @@ function getPool() {
   return pool;
 }
 
+let customQueryHandler = null;
+
+function setQueryHandler(handler) {
+  customQueryHandler = handler;
+}
+
 /**
  * Execute parameterized SQL query
  * @param {string} sql - SQL query string with ? placeholders
  * @param {Array} params - Array of parameters
  */
 async function query(sql, params = []) {
+  if (customQueryHandler) {
+    return customQueryHandler(sql, params);
+  }
   const p = getPool();
   const [results] = await p.execute(sql, params);
   return results;
@@ -49,5 +58,6 @@ async function testConnection() {
 module.exports = {
   getPool,
   query,
+  setQueryHandler,
   testConnection
 };

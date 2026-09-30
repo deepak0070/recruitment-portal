@@ -15,7 +15,6 @@ const storage = multer.diskStorage({
     cb(null, config.uploadDir);
   },
   filename: (req, file, cb) => {
-    // Generate secure randomized filename: resume-candidateId-timestamp-random.pdf
     const candidateId = req.user ? req.user.id : 'anon';
     const timestamp = Date.now();
     const randomSuffix = Math.round(Math.random() * 1e9);
@@ -32,17 +31,33 @@ const fileFilter = (req, file, cb) => {
   if (isPdfMime && isPdfExt) {
     cb(null, true);
   } else {
-    cb(new AppError('Invalid file format. Only PDF resumes are accepted.', 400), false);
+    req.fileValidationError = 'Invalid file format. Only PDF resumes are accepted.';
+    cb(null, false);
   }
 };
 
-const uploadResume = multer({
+const multerInstance = multer({
   storage,
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5 MB limit
   }
 });
+
+/**
+ * Robust wrapper for single resume upload
+ */
+function uploadResume(req, res, next) {
+  multerInstance.single('resume')(req, res, (err) => {
+    if (err) {
+      return next(err);
+    }
+    if (req.fileValidationError) {
+      return next(new AppError(req.fileValidationError, 400));
+    }
+    next();
+  });
+}
 
 module.exports = {
   uploadResume
