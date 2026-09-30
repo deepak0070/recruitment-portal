@@ -54,8 +54,8 @@ export default function JobDetailPage() {
   if (error || !job) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl font-bold text-slate-800">Position Not Found</h2>
-        <p className="text-slate-500 mt-2">{error || 'This job does not exist or has been removed.'}</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Position Not Found</h2>
+        <p className="text-slate-500 dark:text-slate-400 mt-2">{error || 'This job does not exist or has been removed.'}</p>
         <Link
           to="/"
           className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition"
@@ -73,25 +73,25 @@ export default function JobDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-4xl mx-auto">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition mb-6"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition mb-6"
         >
           <ArrowLeft className="w-4 h-4" /> Back to All Openings
         </Link>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
           {/* Header Banner */}
-          <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/50">
+          <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/60">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Badge status={job.job_type} />
                   <Badge status={job.status} />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                   {job.title}
                 </h1>
               </div>
@@ -101,12 +101,12 @@ export default function JobDetailPage() {
                 {job.status === 'closed' ? (
                   <button
                     disabled
-                    className="px-6 py-3 bg-slate-200 text-slate-500 text-sm font-medium rounded-xl cursor-not-allowed"
+                    className="px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm font-medium rounded-xl cursor-not-allowed"
                   >
                     Position Closed
                   </button>
                 ) : hasApplied ? (
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-medium rounded-xl">
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-sm font-medium rounded-xl">
                     <CheckCircle2 className="w-4 h-4" />
                     Application Submitted
                   </div>
@@ -137,24 +137,24 @@ export default function JobDetailPage() {
             </div>
 
             {/* Meta details */}
-            <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-slate-600 mt-6 pt-6 border-t border-slate-200/60">
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-slate-600 dark:text-slate-400 mt-6 pt-6 border-t border-slate-200/60 dark:border-slate-800">
               <div className="flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-slate-400" />
+                <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <span>{job.location}</span>
               </div>
               {job.salary_range && (
-                <div className="flex items-center gap-1.5 font-medium text-slate-800">
+                <div className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200">
                   <DollarSign className="w-4 h-4 text-emerald-500" />
                   <span>{job.salary_range}</span>
                 </div>
               )}
               <div className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-slate-400" />
+                <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <span>Posted on {formattedDate}</span>
               </div>
               {job.creator_name && (
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <User className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                  <User className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                   <span>Posted by {job.creator_name}</span>
                 </div>
               )}
@@ -163,17 +163,17 @@ export default function JobDetailPage() {
 
           {/* Job Description Body */}
           <div className="p-6 sm:p-8">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">About the Role</h3>
-            <div className="prose max-w-none text-slate-700 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">About the Role</h3>
+            <div className="prose max-w-none text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
               {job.description}
             </div>
 
             {/* Application call to action */}
             {job.status === 'open' && !hasApplied && isCandidate && (
-              <div className="mt-10 p-6 bg-indigo-50/70 border border-indigo-100 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="mt-10 p-6 bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                  <h4 className="font-bold text-slate-900">Ready to take the next step?</h4>
-                  <p className="text-xs text-slate-600 mt-0.5">
+                  <h4 className="font-bold text-slate-900 dark:text-white">Ready to take the next step?</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                     Upload your latest PDF resume and optional cover note to submit your application.
                   </p>
                 </div>

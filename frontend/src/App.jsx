@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/common/Navbar';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -21,10 +22,11 @@ import JobApplicantsPage from './pages/admin/JobApplicantsPage';
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-          <Navbar />
-          <div className="flex-1">
+      <ThemeProvider>
+        <AuthProvider>
+          <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+            <Navbar />
+            <div className="flex-1">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
@@ -74,6 +76,7 @@ export default function App() {
           </div>
         </div>
       </AuthProvider>
-    </BrowserRouter>
-  );
+    </ThemeProvider>
+  </BrowserRouter>
+);
 }

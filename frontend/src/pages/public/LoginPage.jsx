@@ -48,19 +48,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <div className="inline-flex bg-indigo-600 text-white p-3 rounded-2xl shadow-md mb-3">
           <Briefcase className="w-8 h-8" />
         </div>
-        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h2>
-        <p className="mt-1 text-sm text-slate-500">Sign in to your RecruitHub account</p>
+        <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Welcome Back</h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign in to your RecruitHub account</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-xl shadow-slate-200/50 rounded-2xl sm:px-10 border border-slate-100">
+        <div className="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl shadow-slate-200/50 dark:shadow-none rounded-2xl sm:px-10 border border-slate-100 dark:border-slate-800">
           {error && (
-            <div className="mb-5 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+            <div className="mb-5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
               <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-500 mt-0.5" />
               <span>{error}</span>
             </div>
@@ -68,9 +68,9 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email address</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email address</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
@@ -79,15 +79,15 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="pl-10 w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="pl-10 w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -96,7 +96,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="pl-10 w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -112,31 +112,31 @@ export default function LoginPage() {
           </form>
 
           {/* Quick Demo Credential Autofill */}
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <p className="text-xs text-slate-500 text-center font-medium mb-2.5">
+          <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center font-medium mb-2.5">
               Quick Test Credentials:
             </p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => fillCredentials('admin')}
-                className="py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-medium transition text-center"
+                className="py-1.5 px-2 bg-indigo-50 dark:bg-indigo-900/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-medium transition text-center"
               >
                 Fill Admin Account
               </button>
               <button
                 type="button"
                 onClick={() => fillCredentials('candidate')}
-                className="py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition text-center"
+                className="py-1.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium transition text-center"
               >
                 Fill Candidate Account
               </button>
             </div>
           </div>
 
-          <div className="mt-6 text-center text-xs text-slate-600">
+          <div className="mt-6 text-center text-xs text-slate-600 dark:text-slate-400">
             Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            <Link to="/register" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">
               Create an account
             </Link>
           </div>

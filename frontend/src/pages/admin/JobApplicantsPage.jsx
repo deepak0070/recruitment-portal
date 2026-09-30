@@ -82,7 +82,6 @@ export default function JobApplicantsPage() {
   };
 
   const handleDownloadResume = (appId) => {
-    // Open resume endpoint with admin auth token
     const token = localStorage.getItem('token');
     fetch(`/api/admin/applications/${appId}/resume`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -116,29 +115,29 @@ export default function JobApplicantsPage() {
   const availableNextStatuses = selectedApp ? nextValidOptions[selectedApp.status] || [] : [];
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
         {/* Navigation */}
         <Link
           to="/admin/manage-jobs"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition mb-4"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Manage Postings
         </Link>
 
         {/* Job Header Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <Badge status={job?.status} />
-              <span className="text-xs text-slate-500">{job?.location}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">{job?.location}</span>
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {job?.title || 'Job Applications'}
             </h1>
           </div>
 
-          <div className="text-sm font-semibold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100 flex items-center gap-2">
+          <div className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-4 py-2 rounded-xl border border-indigo-100 dark:border-indigo-900/50 flex items-center gap-2">
             <Users className="w-4 h-4" />
             <span>{applications.length} Candidates Displayed</span>
           </div>
@@ -153,7 +152,7 @@ export default function JobApplicantsPage() {
               className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition ${
                 statusFilter === st
                   ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               {st}
@@ -165,13 +164,13 @@ export default function JobApplicantsPage() {
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="bg-white rounded-xl border border-slate-200 p-6 animate-pulse h-24" />
+              <div key={n} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 animate-pulse h-24" />
             ))}
           </div>
         ) : applications.length > 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                 <tr>
                   <th className="px-6 py-4">Applicant</th>
                   <th className="px-6 py-4">Email</th>
@@ -180,17 +179,17 @@ export default function JobApplicantsPage() {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {applications.map((app) => (
-                  <tr key={app.id} className="hover:bg-slate-50/70 transition">
-                    <td className="px-6 py-4 font-semibold text-slate-900 flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                  <tr key={app.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs">
                         {app.candidate_name?.charAt(0) || 'C'}
                       </div>
                       <span>{app.candidate_name}</span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600">{app.candidate_email}</td>
-                    <td className="px-6 py-4 text-slate-500">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{app.candidate_email}</td>
+                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
                       {new Date(app.applied_at).toLocaleDateString(undefined, {
                         month: 'short',
                         day: 'numeric',
@@ -203,7 +202,7 @@ export default function JobApplicantsPage() {
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => openReviewModal(app.id)}
-                        className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg text-xs transition"
+                        className="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold rounded-lg text-xs transition"
                       >
                         Review Applicant
                       </button>
@@ -214,10 +213,10 @@ export default function JobApplicantsPage() {
             </table>
           </div>
         ) : (
-          <div className="text-center py-16 bg-white rounded-2xl border border-slate-200">
-            <Filter className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-slate-800">No Applicants in this Stage</h3>
-            <p className="text-sm text-slate-500 mt-1">
+          <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <Filter className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">No Applicants in this Stage</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               There are currently no candidates with status: <span className="font-semibold">{statusFilter}</span>.
             </p>
           </div>
@@ -233,10 +232,10 @@ export default function JobApplicantsPage() {
           {selectedApp && (
             <div className="space-y-6">
               {/* Profile Bar */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="font-bold text-slate-900 text-base">{selectedApp.candidate_name}</h4>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                  <h4 className="font-bold text-slate-900 dark:text-white text-base">{selectedApp.candidate_name}</h4>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     <Mail className="w-3.5 h-3.5" />
                     <span>{selectedApp.candidate_email}</span>
                   </div>
@@ -253,28 +252,28 @@ export default function JobApplicantsPage() {
 
               {/* Cover Note */}
               <div>
-                <h5 className="text-xs font-semibold uppercase text-slate-500 mb-1.5">Candidate Cover Note</h5>
-                <div className="bg-white p-3.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed max-h-36 overflow-y-auto">
-                  {selectedApp.cover_note || <span className="italic text-slate-400">No cover note provided.</span>}
+                <h5 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1.5">Candidate Cover Note</h5>
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 leading-relaxed max-h-36 overflow-y-auto">
+                  {selectedApp.cover_note || <span className="italic text-slate-400 dark:text-slate-500">No cover note provided.</span>}
                 </div>
               </div>
 
               {/* Status Transition Pipeline */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-white">
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
                 <div className="flex items-center justify-between mb-3">
-                  <h5 className="text-xs font-semibold uppercase text-slate-500">Hiring Pipeline Progress</h5>
+                  <h5 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Hiring Pipeline Progress</h5>
                   <Badge status={selectedApp.status} />
                 </div>
 
                 {statusError && (
-                  <div className="mb-3 p-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-xs flex items-center gap-2">
+                  <div className="mb-3 p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 rounded-lg text-xs flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                     <span>{statusError}</span>
                   </div>
                 )}
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-slate-600 font-medium">Advance pipeline to:</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Advance pipeline to:</span>
                   {availableNextStatuses.length > 0 ? (
                     availableNextStatuses.map((nextSt) => (
                       <button
@@ -283,17 +282,17 @@ export default function JobApplicantsPage() {
                         onClick={() => handleStatusChange(nextSt)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition ${
                           nextSt === 'rejected'
-                            ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+                            ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50'
                             : nextSt === 'offered'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                            : 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50'
+                            : 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/50'
                         }`}
                       >
                         → {nextSt}
                       </button>
                     ))
                   ) : (
-                    <span className="text-xs text-slate-400 italic">No further pipeline steps available.</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500 italic">No further pipeline steps available.</span>
                   )}
                 </div>
               </div>

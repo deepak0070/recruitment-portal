@@ -82,31 +82,31 @@ export default function ApplyModal({ isOpen, onClose, job, onApplied }) {
       {success ? (
         <div className="text-center py-8">
           <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-3 animate-bounce" />
-          <h4 className="text-lg font-bold text-slate-900">Application Submitted!</h4>
-          <p className="text-sm text-slate-500 mt-1">
+          <h4 className="text-lg font-bold text-slate-900 dark:text-white">Application Submitted!</h4>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Your application and resume have been forwarded to the recruiting team.
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+            <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
               <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-500 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
               Resume (PDF format, max 5 MB) <span className="text-rose-500">*</span>
             </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-indigo-400 transition bg-slate-50/50">
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-700 border-dashed rounded-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition bg-slate-50/50 dark:bg-slate-800/40">
               <div className="space-y-2 text-center">
-                <UploadCloud className="mx-auto h-10 w-10 text-slate-400" />
-                <div className="flex text-sm text-slate-600 justify-center">
+                <UploadCloud className="mx-auto h-10 w-10 text-slate-400 dark:text-slate-500" />
+                <div className="flex text-sm text-slate-600 dark:text-slate-300 justify-center">
                   <label
                     htmlFor="resume-upload"
-                    className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none"
+                    className="relative cursor-pointer rounded-md font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 focus-within:outline-none"
                   >
                     <span>{file ? file.name : 'Select a PDF document'}</span>
                     <input
@@ -119,13 +119,13 @@ export default function ApplyModal({ isOpen, onClose, job, onApplied }) {
                     />
                   </label>
                 </div>
-                <p className="text-xs text-slate-500">PDF up to 5MB</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">PDF up to 5MB</p>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               Cover Note / Introduction (Optional)
             </label>
             <textarea
@@ -133,16 +133,16 @@ export default function ApplyModal({ isOpen, onClose, job, onApplied }) {
               value={coverNote}
               onChange={(e) => setCoverNote(e.target.value)}
               placeholder="Highlight relevant experience, achievements, or why you are a great match for this role..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+              className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition"
             >
               Cancel
             </button>
