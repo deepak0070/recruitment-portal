@@ -42,4 +42,19 @@ router.delete(
   JobController.deleteJob
 );
 
+const ApplicationController = require('../controllers/application.controller');
+const { uploadResume } = require('../middleware/upload.middleware');
+const { applyJobValidator } = require('../validators/application.validator');
+
+// Candidate application submission
+router.post(
+  '/:id/apply',
+  authenticate,
+  authorize('candidate'),
+  uploadResume.single('resume'),
+  applyJobValidator,
+  validateRequest,
+  ApplicationController.apply
+);
+
 module.exports = router;
