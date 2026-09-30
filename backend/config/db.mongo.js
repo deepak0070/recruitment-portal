@@ -16,11 +16,12 @@ async function connectMongo() {
     });
 
     await mongoose.connect(config.mongo.uri, {
-      serverSelectionTimeoutMS: 5000
+      serverSelectionTimeoutMS: 1500
     });
     return true;
   } catch (error) {
-    console.error(`[MongoDB] Connection warning: ${error.message}`);
+    console.log(`ℹ️ [MongoDB] No MongoDB server running on ${config.mongo.uri}.`);
+    console.log(`⚡ [LocalDB] Audit logs and notes stored in Zero-Install Local Mode.`);
     return false;
   }
 }

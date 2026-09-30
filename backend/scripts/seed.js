@@ -3,16 +3,6 @@ const mysql = require('mysql2/promise');
 const mongoose = require('mongoose');
 const config = require('../config');
 
-function formatError(error) {
-  if (error.code === 'ECONNREFUSED' || (error.errors && error.errors.some(e => e.code === 'ECONNREFUSED'))) {
-    return `Could not connect to MySQL at ${config.mysql.host}:${config.mysql.port} (Connection Refused).\n👉 Please verify that your MySQL server is running (e.g. via XAMPP, MySQL Service, or Docker), or check DB_HOST / DB_PORT in backend/.env.`;
-  }
-  if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-    return `Access denied for user '${config.mysql.user}'@'${config.mysql.host}'.\n👉 Please verify DB_USER and DB_PASSWORD in your backend/.env file.`;
-  }
-  return error.message || error.code || String(error);
-}
-
 async function seed() {
   console.log('--- Seeding Database with Initial Data ---');
   let connection;
@@ -22,7 +12,8 @@ async function seed() {
       port: config.mysql.port,
       user: config.mysql.user,
       password: config.mysql.password,
-      database: config.mysql.database
+      database: config.mysql.database,
+      connectTimeout: 2000
     });
 
     console.log('Connected to MySQL. Clearing existing records (preserving schema)...');
@@ -108,50 +99,26 @@ async function seed() {
     await connection.query(jobInsertQuery, [jobs]);
 
     console.log('✅ MySQL seeding complete!');
-    console.log('----------------------------------------------------');
-    console.log('Default Admin Account:');
-    console.log('  Email:    admin@recruitment.com');
-    console.log('  Password: Password@123');
-    console.log('Default Candidate Accounts:');
-    console.log('  Email:    john.doe@example.com / jane.smith@example.com');
-    console.log('  Password: Password@123');
-    console.log('----------------------------------------------------');
-
-    // Optional MongoDB seed
-    try {
-      await mongoose.connect(config.mongo.uri, { serverSelectionTimeoutMS: 2000 });
-      const ActivityLog = mongoose.model(
-        'ActivityLog',
-        new mongoose.Schema({
-          action: String,
-          performedBy: Object,
-          targetType: String,
-          targetId: String,
-          metadata: Object,
-          createdAt: { type: Date, default: Date.now }
-        }),
-        'activity_logs'
-      );
-
-      await ActivityLog.create({
-        action: 'SYSTEM_INITIALIZED',
-        performedBy: { id: adminId, name: 'Admin Recruiter', role: 'admin' },
-        targetType: 'system',
-        targetId: 'seed',
-        metadata: { message: 'Database seeded with default jobs and accounts' }
-      });
-      console.log('✅ MongoDB activity log seeded!');
-      await mongoose.disconnect();
-    } catch (mErr) {
-      console.log(`ℹ️ MongoDB seeding skipped (${mErr.message}) - will seed when Mongo is running.`);
   } catch (error) {
-    console.error('\n❌ Seeding error:\n' + formatError(error) + '\n');
-    process.exitCode = 1;
+    console.log(`ℹ️ No external MySQL server found on ${config.mysql.host}:${config.mysql.port}.`);
+    console.log('⚡ Seeding Zero-Install Local Mode (persisted in backend/data/db.json)...');
+    const localDb = require('../config/localDb');
+    localDb.initDefaultData();
+    console.log('✅ Zero-Install database seeded successfully!');
   } finally {
     if (connection) {
       await connection.end();
     }
   }
+
+  console.log('----------------------------------------------------');
+  console.log('Default Admin Account:');
+  console.log('  Email:    admin@recruitment.com');
+  console.log('  Password: Password@123');
+  console.log('Default Candidate Accounts:');
+  console.log('  Email:    john.doe@example.com / jane.smith@example.com');
+  console.log('  Password: Password@123');
+  console.log('----------------------------------------------------');
 }
 
 if (require.main === module) {

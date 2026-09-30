@@ -3,18 +3,8 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 const config = require('../config');
 
-function formatError(error) {
-  if (error.code === 'ECONNREFUSED' || (error.errors && error.errors.some(e => e.code === 'ECONNREFUSED'))) {
-    return `Could not connect to MySQL at ${config.mysql.host}:${config.mysql.port} (Connection Refused).\n👉 Please verify that your MySQL server is running (e.g. via XAMPP, MySQL Windows Service, or Docker), or check DB_HOST / DB_PORT in backend/.env.`;
-  }
-  if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-    return `Access denied for user '${config.mysql.user}'@'${config.mysql.host}'.\n👉 Please verify DB_USER and DB_PASSWORD in your backend/.env file.`;
-  }
-  return error.message || error.code || String(error);
-}
-
 async function initDb() {
-  console.log('--- Initializing MySQL Database ---');
+  console.log('--- Initializing Database ---');
   let connection;
   try {
     connection = await mysql.createConnection({
@@ -22,10 +12,11 @@ async function initDb() {
       port: config.mysql.port,
       user: config.mysql.user,
       password: config.mysql.password,
-      multipleStatements: true
+      multipleStatements: true,
+      connectTimeout: 2000
     });
 
-    console.log(`Connected to MySQL server at ${config.mysql.host}:${config.mysql.port}`);
+    console.log(`Connected to external MySQL server at ${config.mysql.host}:${config.mysql.port}`);
 
     const sqlPath = path.resolve(__dirname, 'schema.sql');
     const sql = fs.readFileSync(sqlPath, 'utf8');
@@ -35,8 +26,11 @@ async function initDb() {
 
     console.log('✅ Database schema created/verified successfully!');
   } catch (error) {
-    console.error('\n❌ Database initialization error:\n' + formatError(error) + '\n');
-    process.exitCode = 1;
+    console.log(`ℹ️ No external MySQL server found on ${config.mysql.host}:${config.mysql.port}.`);
+    console.log('⚡ Initializing Zero-Install Local Mode (persisted database)...');
+    const localDb = require('../config/localDb');
+    localDb.initDefaultData();
+    console.log('✅ Zero-Install database initialized successfully in backend/data/db.json!');
   } finally {
     if (connection) {
       await connection.end();

@@ -1,0 +1,377 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Admin Recruiter",
+      "email": "admin@recruitment.com",
+      "password_hash": "$2b$10$rcZ6JOQbMq.FZsTqG5mp6e2zSozfkuRGI/ppff9jCUF4uMQObiQDy",
+      "role": "admin",
+      "created_at": "2026-09-30T17:50:38.777Z"
+    },
+    {
+      "id": 2,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "password_hash": "$2b$10$rcZ6JOQbMq.FZsTqG5mp6e2zSozfkuRGI/ppff9jCUF4uMQObiQDy",
+      "role": "candidate",
+      "created_at": "2026-09-30T17:50:38.777Z"
+    },
+    {
+      "id": 3,
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "password_hash": "$2b$10$rcZ6JOQbMq.FZsTqG5mp6e2zSozfkuRGI/ppff9jCUF4uMQObiQDy",
+      "role": "candidate",
+      "created_at": "2026-09-30T17:50:38.777Z"
+    },
+    {
+      "id": 4,
+      "name": "Alex Kumar",
+      "email": "alex.kumar@example.com",
+      "password_hash": "$2b$10$rcZ6JOQbMq.FZsTqG5mp6e2zSozfkuRGI/ppff9jCUF4uMQObiQDy",
+      "role": "candidate",
+      "created_at": "2026-09-30T17:50:38.777Z"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 1,
+      "title": "Senior Full-Stack Engineer",
+      "description": "We are seeking an experienced Senior Full-Stack Engineer to architect and build scalable web applications. You will work across Node.js, Express, React, MySQL, and modern cloud infrastructure.",
+      "location": "Remote",
+      "job_type": "Full-time",
+      "salary_range": "$120,000 - $150,000",
+      "status": "open",
+      "created_by": 1,
+      "created_at": "2026-09-30T17:50:38.777Z",
+      "updated_at": "2026-09-30T17:50:38.777Z",
+      "creator_name": "Admin Recruiter",
+      "applicant_count": 0
+    },
+    {
+      "id": 2,
+      "title": "Frontend Developer (React / Tailwind)",
+      "description": "Join our UI team to build sleek, accessible, and responsive user experiences using React, Vite, and Tailwind CSS. Experience with state management and REST APIs is required.",
+      "location": "New York, NY",
+      "job_type": "Full-time",
+      "salary_range": "$90,000 - $115,000",
+      "status": "open",
+      "created_by": 1,
+      "created_at": "2026-09-30T17:50:38.777Z",
+      "updated_at": "2026-09-30T17:50:38.777Z",
+      "creator_name": "Admin Recruiter",
+      "applicant_count": 0
+    },
+    {
+      "id": 3,
+      "title": "Backend Engineer (Node.js & MySQL)",
+      "description": "Focus on RESTful API design, database query optimization, security, and transaction management in high-throughput production environments.",
+      "location": "San Francisco, CA",
+      "job_type": "Contract",
+      "salary_range": "$70 - $90 / hour",
+      "status": "open",
+      "created_by": 1,
+      "created_at": "2026-09-30T17:50:38.777Z",
+      "updated_at": "2026-09-30T17:50:38.777Z",
+      "creator_name": "Admin Recruiter",
+      "applicant_count": 0
+    },
+    {
+      "id": 4,
+      "title": "DevOps & Cloud Engineer",
+      "description": "Automate container deployment, monitor infrastructure performance, and ensure reliability and high availability across cloud platforms.",
+      "location": "Remote",
+      "job_type": "Full-time",
+      "salary_range": "$130,000 - $160,000",
+      "status": "open",
+      "created_by": 1,
+      "created_at": "2026-09-30T17:50:38.777Z",
+      "updated_at": "2026-09-30T17:50:38.777Z",
+      "creator_name": "Admin Recruiter",
+      "applicant_count": 0
+    },
+    {
+      "id": 5,
+      "title": "Product Designer (UI/UX)",
+      "description": "Create intuitive user flows, high-fidelity prototypes, and cohesive design systems for internal enterprise tooling and consumer web applications.",
+      "location": "Austin, TX",
+      "job_type": "Part-time",
+      "salary_range": "$50,000 - $65,000",
+      "status": "closed",
+      "created_by": 1,
+      "created_at": "2026-09-30T17:50:38.777Z",
+      "updated_at": "2026-09-30T17:50:38.777Z",
+      "creator_name": "Admin Recruiter",
+      "applicant_count": 0
+    }
+  ],
+  "applications": [],
+  "notes": [],
+  "activity": [
+    {
+      "_id": "act-1790790705614-904",
+      "action": "JOB_DELETED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "job",
+      "targetId": "2",
+      "metadata": {
+        "deletedTitle": "Backend Specialist"
+      },
+      "createdAt": "2026-09-30T17:51:45.614Z"
+    },
+    {
+      "_id": "act-1790790705601-705",
+      "action": "JOB_UPDATED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "job",
+      "targetId": "1",
+      "metadata": {
+        "changes": {
+          "status": "closed"
+        },
+        "previousStatus": "closed",
+        "newStatus": "closed"
+      },
+      "createdAt": "2026-09-30T17:51:45.601Z"
+    },
+    {
+      "_id": "act-1790790705582-701",
+      "action": "JOB_CREATED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "job",
+      "targetId": "3",
+      "metadata": {
+        "title": "Staff Platform Engineer",
+        "location": "Seattle, WA",
+        "job_type": "Full-time",
+        "status": "open"
+      },
+      "createdAt": "2026-09-30T17:51:45.582Z"
+    },
+    {
+      "_id": "act-1790790704735-439",
+      "action": "STATUS_CHANGED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "candidateName": "Candidate John",
+        "jobTitle": "Senior Full-Stack Engineer",
+        "previousStatus": "interview",
+        "newStatus": "offered"
+      },
+      "createdAt": "2026-09-30T17:51:44.735Z"
+    },
+    {
+      "_id": "act-1790790704721-213",
+      "action": "STATUS_CHANGED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "candidateName": "Candidate John",
+        "jobTitle": "Senior Full-Stack Engineer",
+        "previousStatus": "shortlisted",
+        "newStatus": "interview"
+      },
+      "createdAt": "2026-09-30T17:51:44.721Z"
+    },
+    {
+      "_id": "act-1790790704664-394",
+      "action": "STATUS_CHANGED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "candidateName": "Candidate John",
+        "jobTitle": "Senior Full-Stack Engineer",
+        "previousStatus": "applied",
+        "newStatus": "shortlisted"
+      },
+      "createdAt": "2026-09-30T17:51:44.664Z"
+    },
+    {
+      "_id": "act-1790790704561-481",
+      "action": "APPLICATION_SUBMITTED",
+      "performedBy": {
+        "id": 2,
+        "name": "Candidate John",
+        "role": "candidate"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "jobId": 1,
+        "jobTitle": "Senior Full-Stack Engineer",
+        "resumeFilename": "resume-2-1790790704536-461955225.pdf"
+      },
+      "createdAt": "2026-09-30T17:51:44.561Z"
+    },
+    {
+      "_id": "act-1790790672221-853",
+      "action": "STATUS_CHANGED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "candidateName": "Candidate John",
+        "jobTitle": "Senior Full-Stack Engineer",
+        "previousStatus": "interview",
+        "newStatus": "offered"
+      },
+      "createdAt": "2026-09-30T17:51:12.221Z"
+    },
+    {
+      "_id": "act-1790790672204-729",
+      "action": "STATUS_CHANGED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "candidateName": "Candidate John",
+        "jobTitle": "Senior Full-Stack Engineer",
+        "previousStatus": "shortlisted",
+        "newStatus": "interview"
+      },
+      "createdAt": "2026-09-30T17:51:12.204Z"
+    },
+    {
+      "_id": "act-1790790672138-602",
+      "action": "STATUS_CHANGED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "candidateName": "Candidate John",
+        "jobTitle": "Senior Full-Stack Engineer",
+        "previousStatus": "applied",
+        "newStatus": "shortlisted"
+      },
+      "createdAt": "2026-09-30T17:51:12.138Z"
+    },
+    {
+      "_id": "act-1790790672028-320",
+      "action": "APPLICATION_SUBMITTED",
+      "performedBy": {
+        "id": 2,
+        "name": "Candidate John",
+        "role": "candidate"
+      },
+      "targetType": "application",
+      "targetId": "1",
+      "metadata": {
+        "jobId": 1,
+        "jobTitle": "Senior Full-Stack Engineer",
+        "resumeFilename": "resume-2-1790790672015-338528157.pdf"
+      },
+      "createdAt": "2026-09-30T17:51:12.028Z"
+    },
+    {
+      "_id": "act-1790790671176-824",
+      "action": "JOB_DELETED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "job",
+      "targetId": "2",
+      "metadata": {
+        "deletedTitle": "Backend Specialist"
+      },
+      "createdAt": "2026-09-30T17:51:11.176Z"
+    },
+    {
+      "_id": "act-1790790671151-328",
+      "action": "JOB_UPDATED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "job",
+      "targetId": "1",
+      "metadata": {
+        "changes": {
+          "status": "closed"
+        },
+        "previousStatus": "closed",
+        "newStatus": "closed"
+      },
+      "createdAt": "2026-09-30T17:51:11.151Z"
+    },
+    {
+      "_id": "act-1790790671128-95",
+      "action": "JOB_CREATED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Test",
+        "role": "admin"
+      },
+      "targetType": "job",
+      "targetId": "3",
+      "metadata": {
+        "title": "Staff Platform Engineer",
+        "location": "Seattle, WA",
+        "job_type": "Full-time",
+        "status": "open"
+      },
+      "createdAt": "2026-09-30T17:51:11.128Z"
+    },
+    {
+      "_id": "act-1",
+      "action": "SYSTEM_INITIALIZED",
+      "performedBy": {
+        "id": 1,
+        "name": "Admin Recruiter",
+        "role": "admin"
+      },
+      "targetType": "system",
+      "targetId": "init",
+      "metadata": {
+        "message": "Zero-install database initialized with default positions"
+      },
+      "createdAt": "2026-09-30T17:50:38.777Z"
+    }
+  ],
+  "nextUserId": 5,
+  "nextJobId": 6,
+  "nextAppId": 1,
+  "nextNoteId": 1
+}

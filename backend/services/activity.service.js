@@ -1,21 +1,16 @@
 const ActivityLog = require('../models/mongo/activityLog.model');
 const mongoose = require('mongoose');
 
+const localDb = require('../config/localDb');
+
 class ActivityService {
   /**
-   * Log an activity event to MongoDB
-   * @param {Object} params
-   * @param {string} params.action
-   * @param {Object} params.performedBy - { id, name, role }
-   * @param {string} params.targetType - 'job' | 'application' | 'user' | 'system'
-   * @param {string|number} params.targetId
-   * @param {Object} [params.metadata]
+   * Log an activity event to MongoDB (or localDb when MongoDB is offline)
    */
   static async log({ action, performedBy, targetType, targetId, metadata = {} }) {
     try {
       if (mongoose.connection.readyState !== 1) {
-        console.warn(`[ActivityService] MongoDB not ready (state: ${mongoose.connection.readyState}). Skipping log: ${action}`);
-        return null;
+        return localDb.logActivity({ action, performedBy, targetType, targetId, metadata });
       }
 
       const logEntry = await ActivityLog.create({
@@ -45,7 +40,7 @@ class ActivityService {
   static async getRecentLogs(limit = 20, skip = 0) {
     try {
       if (mongoose.connection.readyState !== 1) {
-        return [];
+        return localDb.getRecentActivity(limit);
       }
       return await ActivityLog.find()
         .sort({ createdAt: -1 })

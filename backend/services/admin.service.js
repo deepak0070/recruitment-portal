@@ -6,6 +6,8 @@ const ApplicationModel = require('../models/mysql/application.model');
 const JobModel = require('../models/mysql/job.model');
 const ApplicantNote = require('../models/mongo/applicantNote.model');
 const ActivityService = require('./activity.service');
+const mongoose = require('mongoose');
+const localDb = require('../config/localDb');
 const { AppError } = require('../middleware/error.middleware');
 
 class AdminService {
@@ -71,11 +73,15 @@ class AdminService {
 
     let notes = [];
     try {
-      notes = await ApplicantNote.find({ applicationId })
-        .sort({ createdAt: -1 })
-        .lean();
+      if (mongoose.connection.readyState === 1) {
+        notes = await ApplicantNote.find({ applicationId })
+          .sort({ createdAt: -1 })
+          .lean();
+      } else {
+        notes = localDb.getNotes(applicationId);
+      }
     } catch (err) {
-      console.warn(`[AdminService] Unable to fetch notes from MongoDB: ${err.message}`);
+      notes = localDb.getNotes(applicationId);
     }
 
     return {
@@ -151,14 +157,28 @@ class AdminService {
 
     let noteDoc;
     try {
-      noteDoc = await ApplicantNote.create({
-        applicationId: parseInt(applicationId, 10),
+      if (mongoose.connection.readyState === 1) {
+        noteDoc = await ApplicantNote.create({
+          applicationId: parseInt(applicationId, 10),
+          adminId: adminUser.id,
+          adminName: adminUser.name,
+          note: noteText.trim()
+        });
+      } else {
+        noteDoc = localDb.addNote({
+          applicationId,
+          adminId: adminUser.id,
+          adminName: adminUser.name,
+          note: noteText.trim()
+        });
+      }
+    } catch (err) {
+      noteDoc = localDb.addNote({
+        applicationId,
         adminId: adminUser.id,
         adminName: adminUser.name,
         note: noteText.trim()
       });
-    } catch (err) {
-      throw new AppError(`Failed to save note to MongoDB: ${err.message}`, 500);
     }
 
     // Audit log
@@ -181,7 +201,7 @@ class AdminService {
   }
 
   /**
-   * Get all internal notes for an applicant from MongoDB
+   * Get all internal notes for an applicant from MongoDB (or localDb)
    */
   static async getApplicantNotes(applicationId) {
     const application = await ApplicationModel.findById(applicationId);
@@ -190,12 +210,15 @@ class AdminService {
     }
 
     try {
-      return await ApplicantNote.find({ applicationId: parseInt(applicationId, 10) })
-        .sort({ createdAt: -1 })
-        .lean();
+      if (mongoose.connection.readyState === 1) {
+        return await ApplicantNote.find({ applicationId: parseInt(applicationId, 10) })
+          .sort({ createdAt: -1 })
+          .lean();
+      } else {
+        return localDb.getNotes(applicationId);
+      }
     } catch (err) {
-      console.warn(`[AdminService] Error fetching notes from MongoDB: ${err.message}`);
-      return [];
+      return localDb.getNotes(applicationId);
     }
   }
 
