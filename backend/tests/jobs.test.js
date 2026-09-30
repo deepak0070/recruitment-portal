@@ -104,4 +104,57 @@ describe('Jobs Module Integration Tests', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
+
+  it('should search live external jobs from India tech feed via GET /api/jobs/external/live', async () => {
+    const res = await request(app)
+      .get('/api/jobs/external/live')
+      .query({ query: 'React', location: 'Bengaluru' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.pagination).toBeDefined();
+    expect(res.body.pagination.provider).toBeDefined();
+    if (res.body.data.length > 0) {
+      expect(res.body.data[0]).toHaveProperty('title');
+      expect(res.body.data[0]).toHaveProperty('company');
+      expect(res.body.data[0]).toHaveProperty('location');
+    }
+  });
+
+  it('should allow admin to 1-click import an external job posting into portal', async () => {
+    const externalJob = {
+      title: 'Senior Cloud Platform Engineer (Imported)',
+      description: 'Role imported directly from live external aggregator',
+      location: 'Bengaluru, India',
+      jobType: 'Full-time',
+      salaryRange: '₹25,00,000 - ₹35,00,000',
+      applyUrl: 'https://example.com/apply',
+      source: 'Adzuna India'
+    };
+
+    const res = await request(app)
+      .post('/api/jobs/external/import')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(externalJob);
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.title).toBe(externalJob.title);
+    expect(res.body.data.location).toBe(externalJob.location);
+  });
+
+  it('should deny candidate from importing external jobs (403)', async () => {
+    const res = await request(app)
+      .post('/api/jobs/external/import')
+      .set('Authorization', `Bearer ${candidateToken}`)
+      .send({
+        title: 'Unauthorized Import',
+        description: 'Test',
+        location: 'Remote'
+      });
+
+    expect(res.status).toBe(403);
+  });
 });
+

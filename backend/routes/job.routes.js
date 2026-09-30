@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const JobController = require('../controllers/job.controller');
+const ExternalJobsController = require('../controllers/externalJobs.controller');
 const {
   createJobValidator,
   updateJobValidator,
@@ -9,6 +10,15 @@ const {
 } = require('../validators/job.validator');
 const { validateRequest } = require('../middleware/validate.middleware');
 const { authenticate, authorize, optionalAuthenticate } = require('../middleware/auth.middleware');
+
+// Real-time external job search and 1-click admin import
+router.get('/external/live', ExternalJobsController.getLiveJobs);
+router.post(
+  '/external/import',
+  authenticate,
+  authorize('admin'),
+  ExternalJobsController.importJob
+);
 
 // Public endpoints (with optional auth to detect admin preferences)
 router.get('/', optionalAuthenticate, getJobsValidator, validateRequest, JobController.getJobs);

@@ -38,6 +38,11 @@ RecruitHub enables organizations to manage their end-to-end recruitment lifecycl
 - **Internal Applicant Notes**: Save private evaluation feedback and interview notes per applicant (backed by MongoDB).
 - **Activity Audit Trail**: Chronological timeline of all system and recruitment actions.
 
+### 3. Real-Time External Job Market Feeds (Adzuna & Jooble Integration)
+- **Live Indian Market Search**: Search real-time tech opportunities across major hubs (Bengaluru, Delhi NCR, Mumbai, Hyderabad, Pune, Remote).
+- **Direct Aggregator Endpoints**: Integrated with **Adzuna API** (dedicated India endpoint `api.adzuna.com/v1/api/jobs/in`) and **Jooble API** (`jooble.org/api`), with automatic zero-config live fallback.
+- **1-Click Admin Import**: Administrators can browse external opportunities and import any job into the portal database with 1 click, instantly accepting internal candidate applications and tracking applicants through the hiring pipeline.
+
 ---
 
 ## 🗄️ Dual-Database Architecture & Rationale
@@ -252,7 +257,7 @@ Visit the application in your browser:
 
 ## 🧪 Running Integration Tests
 
-The test suite includes **23 comprehensive integration tests** covering Authentication, Job CRUD, Public Search/Pagination, Multer PDF Uploads, Duplicate Application Prevention, and Admin Status Progression:
+The test suite includes **26 comprehensive integration tests** covering Authentication, Job CRUD, Public Search/Pagination, Multer PDF Uploads, Duplicate Application Prevention, Admin Status Progression, and Real-Time External Job Search/Import:
 
 ```bash
 # Run tests from backend
@@ -262,7 +267,7 @@ npm test
 
 ### Test Suite Summary:
 - `tests/auth.test.js`: Registration, field validation, duplicate email protection, login, password comparison, token verification, and `/api/auth/me`.
-- `tests/jobs.test.js`: Public job listing, search & pagination metadata, single job lookup, 404 handling, role-based protection (401/403), admin job creation, update, and deletion.
+- `tests/jobs.test.js`: Public job listing, search & pagination metadata, single job lookup, 404 handling, role-based protection (401/403), admin job creation, update, deletion, live external job search (`GET /api/jobs/external/live`), admin 1-click import (`POST /api/jobs/external/import`), and unauthorized candidate prevention (403).
 - `tests/applicationFlow.test.js`: Candidate apply flow with PDF resume, non-PDF rejection, duplicate submission block (409 Conflict), candidate "My Applications" listing, admin pipeline status advancement (`applied` ➔ `shortlisted` ➔ `interview` ➔ `offered`), invalid status transition rejection (400), and non-admin role restrictions (403).
 
 ---
@@ -282,6 +287,8 @@ Base URL: `/api`
 | Method | Endpoint | Auth | Role | Description |
 |---|---|---|---|---|
 | `GET` | `/api/jobs` | Optional | Public | Paginated open jobs with `search`, `location`, `jobType`, and `status` query filters |
+| `GET` | `/api/jobs/external/live` | None | Public | Real-time Indian job aggregation from **Adzuna India** & **Jooble** |
+| `POST` | `/api/jobs/external/import` | Bearer | Admin | 1-Click import external job posting into portal database |
 | `GET` | `/api/jobs/:id` | None | Public | Get full details of a specific job |
 | `POST` | `/api/jobs` | Bearer | Admin | Create a new job posting (logged in MongoDB) |
 | `PUT` | `/api/jobs/:id` | Bearer | Admin | Update job details or change status to `closed`/`open` |

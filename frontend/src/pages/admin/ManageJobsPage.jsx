@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../api/client';
 import Badge from '../../components/common/Badge';
 import Modal from '../../components/common/Modal';
+import ExternalJobCard from '../../components/jobs/ExternalJobCard';
 import {
   Briefcase,
   Plus,
@@ -14,7 +15,10 @@ import {
   MapPin,
   Clock,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Search,
+  Globe
 } from 'lucide-react';
 
 export default function ManageJobsPage() {
@@ -24,6 +28,15 @@ export default function ManageJobsPage() {
   const [editingJob, setEditingJob] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Live Import Modal State
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importSearch, setImportSearch] = useState('');
+  const [importLocation, setImportLocation] = useState('Bengaluru');
+  const [importProvider, setImportProvider] = useState('all');
+  const [importJobs, setImportJobs] = useState([]);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importNotice, setImportNotice] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -47,9 +60,35 @@ export default function ManageJobsPage() {
     }
   };
 
+  const fetchLiveExternalJobs = async () => {
+    setImportLoading(true);
+    try {
+      const res = await api.get('/jobs/external/live', {
+        params: {
+          query: importSearch,
+          location: importLocation,
+          provider: importProvider,
+          limit: 6
+        }
+      });
+      setImportJobs(res.data.data);
+      setImportNotice(res.data.pagination?.notice);
+    } catch (err) {
+      console.error('Failed to load external jobs:', err.message);
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    if (isImportModalOpen && importJobs.length === 0) {
+      fetchLiveExternalJobs();
+    }
+  }, [isImportModalOpen]);
 
   const openCreateModal = () => {
     setEditingJob(null);
@@ -141,13 +180,22 @@ export default function ManageJobsPage() {
             </p>
           </div>
 
-          <button
-            onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition"
-          >
-            <Plus className="w-4 h-4" />
-            Post New Job
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition"
+            >
+              <Sparkles className="w-4 h-4 text-emerald-200" />
+              Discover & Import Live Jobs
+            </button>
+            <button
+              onClick={openCreateModal}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition"
+            >
+              <Plus className="w-4 h-4" />
+              Post New Job
+            </button>
+          </div>
         </div>
 
         {/* Job List Table / Cards */}
@@ -375,6 +423,101 @@ export default function ManageJobsPage() {
               </button>
             </div>
           </form>
+        </Modal>
+
+        {/* Live Jobs Discovery & 1-Click Import Modal */}
+        <Modal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          title="Discover Live India Roles (Adzuna & Jooble Aggregation)"
+          maxWidth="max-w-4xl"
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-slate-500">
+              Search real-time positions from Indian tech hubs and 1-click import them into your recruitment portal.
+            </p>
+
+            {importNotice && (
+              <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-xs text-indigo-700">
+                {importNotice}
+              </div>
+            )}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                fetchLiveExternalJobs();
+              }}
+              className="flex flex-col sm:flex-row items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200"
+            >
+              <div className="flex items-center gap-2 flex-1 px-3 py-1.5 w-full bg-white rounded-lg border border-slate-200">
+                <Search className="w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={importSearch}
+                  onChange={(e) => setImportSearch(e.target.value)}
+                  placeholder="Keyword (e.g. React, Node.js, DevOps)..."
+                  className="w-full text-xs outline-none py-1"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 flex-1 px-3 py-1.5 w-full bg-white rounded-lg border border-slate-200">
+                <MapPin className="w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={importLocation}
+                  onChange={(e) => setImportLocation(e.target.value)}
+                  placeholder="City (e.g. Bengaluru, Delhi NCR, Remote)..."
+                  className="w-full text-xs outline-none py-1"
+                />
+              </div>
+
+              <select
+                value={importProvider}
+                onChange={(e) => setImportProvider(e.target.value)}
+                className="px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg text-slate-700 font-medium"
+              >
+                <option value="all">All Sources</option>
+                <option value="adzuna">Adzuna India</option>
+                <option value="jooble">Jooble India</option>
+              </select>
+
+              <button
+                type="submit"
+                disabled={importLoading}
+                className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition"
+              >
+                {importLoading ? 'Searching...' : 'Search Live'}
+              </button>
+            </form>
+
+            {/* Results Grid */}
+            {importLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6">
+                {[1, 2].map((n) => (
+                  <div key={n} className="bg-slate-50 rounded-xl border border-slate-200 p-4 h-40 animate-pulse" />
+                ))}
+              </div>
+            ) : importJobs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-1">
+                {importJobs.map((j) => (
+                  <ExternalJobCard
+                    key={j.id}
+                    job={j}
+                    onImportSuccess={() => {
+                      fetchJobs();
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-slate-50 rounded-xl border border-slate-200">
+                <Globe className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-700">No live jobs found</p>
+                <p className="text-xs text-slate-500 mt-1">Try modifying your keyword or city.</p>
+              </div>
+            )}
+          </div>
         </Modal>
       </div>
     </div>

@@ -27,8 +27,12 @@ describe('Job Application & Hiring Pipeline Flow', () => {
   });
 
   afterAll(() => {
-    if (fs.existsSync(dummyPdfPath)) {
-      fs.unlinkSync(dummyPdfPath);
+    try {
+      if (fs.existsSync(dummyPdfPath)) {
+        fs.unlinkSync(dummyPdfPath);
+      }
+    } catch (_) {
+      // Ignore Windows transient file lock during cleanup
     }
   });
 

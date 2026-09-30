@@ -24,5 +24,18 @@ module.exports = {
     uri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/recruitment_portal'
   },
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  uploadDir: path.resolve(__dirname, '../uploads/resumes')
+  uploadDir: path.resolve(__dirname, '../uploads/resumes'),
+  externalJobs: {
+    adzuna: {
+      appId: process.env.ADZUNA_APP_ID || '',
+      appKey: process.env.ADZUNA_APP_KEY || '',
+      country: process.env.ADZUNA_COUNTRY || 'in' // dedicated India endpoint
+    },
+    jooble: {
+      apiKey: process.env.JOOBLE_API_KEY || ''
+    },
+    careerjet: {
+      affId: process.env.CAREERJET_AFFID || ''
+    }
+  }
 };
