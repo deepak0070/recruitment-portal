@@ -10,6 +10,9 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// Trust Railway / reverse proxy X-Forwarded-For headers for accurate rate limiting
+app.set('trust proxy', 1);
+
 // Ensure resume upload directory exists on startup (works with mounted volumes)
 if (!fs.existsSync(config.uploadDir)) {
   fs.mkdirSync(config.uploadDir, { recursive: true });
