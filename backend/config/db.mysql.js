@@ -2,6 +2,16 @@ const mysql = require('mysql2/promise');
 const config = require('./index');
 
 let pool = null;
+let usingLocalDb = false;
+
+function isRemoteHost() {
+  const host = (config.mysql.host || '').toLowerCase();
+  return host !== 'localhost' && host !== '127.0.0.1' && host !== '::1';
+}
+
+function isUsingLocalDb() {
+  return usingLocalDb;
+}
 
 function getPool() {
   if (!pool) {
@@ -13,7 +23,8 @@ function getPool() {
       database: config.mysql.database,
       waitForConnections: config.mysql.waitForConnections,
       connectionLimit: config.mysql.connectionLimit,
-      queueLimit: config.mysql.queueLimit
+      queueLimit: config.mysql.queueLimit,
+      connectTimeout: isRemoteHost() ? 10000 : 2000
     });
   }
   return pool;
@@ -41,58 +52,103 @@ async function query(sql, params = []) {
 
 const localDb = require('./localDb');
 
-/**
- * Test MySQL connection or seamlessly fall back to Zero-Install Local Mode
- */
-async function testConnection() {
-  return new Promise((resolve) => {
-    let resolved = false;
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        console.log(`ℹ️ [MySQL] No MySQL server responding on ${config.mysql.host}:${config.mysql.port}.`);
-        console.log(`⚡ [LocalDB] Switched to Zero-Install Local Mode (persisted in backend/data/db.json).`);
-        setQueryHandler((sql, params) => localDb.execute(sql, params));
-        resolve(true);
+function trySingleConnection(timeoutMs) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error(`Connection timed out after ${timeoutMs}ms`));
       }
-    }, 1500);
+    }, timeoutMs);
 
     try {
       const p = getPool();
       p.getConnection()
         .then((connection) => {
-          if (!resolved) {
-            resolved = true;
-            clearTimeout(timeout);
-            console.log(`[MySQL] Connected successfully to database: ${config.mysql.database}`);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
             connection.release();
             resolve(true);
+          } else {
+            connection.release();
           }
         })
         .catch((error) => {
-          if (!resolved) {
-            resolved = true;
-            clearTimeout(timeout);
-            console.log(`ℹ️ [MySQL] No MySQL server running on ${config.mysql.host}:${config.mysql.port}.`);
-            console.log(`⚡ [LocalDB] Switched to Zero-Install Local Mode (persisted in backend/data/db.json).`);
-            setQueryHandler((sql, params) => localDb.execute(sql, params));
-            resolve(true);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            reject(error);
           }
         });
     } catch (e) {
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timeout);
-        setQueryHandler((sql, params) => localDb.execute(sql, params));
-        resolve(true);
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        reject(e);
       }
     }
   });
+}
+
+/**
+ * Test MySQL connection (with retries for cloud/production hosts)
+ * or seamlessly fall back to Zero-Install Local Mode
+ */
+async function testConnection() {
+  if (customQueryHandler) {
+    return true;
+  }
+
+  const remoteOrProd = isRemoteHost() || config.nodeEnv === 'production';
+  const maxAttempts = remoteOrProd ? 6 : 1;
+  const timeoutMs = remoteOrProd ? 8000 : 1500;
+  const retryDelayMs = 2500;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await trySingleConnection(timeoutMs);
+      usingLocalDb = false;
+      console.log(`[MySQL] Connected successfully to ${config.mysql.host}:${config.mysql.port}/${config.mysql.database}`);
+      return true;
+    } catch (error) {
+      if (attempt < maxAttempts) {
+        console.log(`⏳ [MySQL] Attempt ${attempt}/${maxAttempts} failed (${error.message}). Retrying in ${retryDelayMs}ms...`);
+        await new Promise((r) => setTimeout(r, retryDelayMs));
+      } else {
+        console.log(`ℹ️ [MySQL] No MySQL server responding on ${config.mysql.host}:${config.mysql.port} (${error.message}).`);
+        console.log(`⚡ [LocalDB] Switched to Zero-Install Local Mode (persisted in backend/data/db.json).`);
+        usingLocalDb = true;
+        setQueryHandler((sql, params) => localDb.execute(sql, params));
+        return true;
+      }
+    }
+  }
+  return true;
+}
+
+async function checkHealth() {
+  if (usingLocalDb) {
+    return 'local-json';
+  }
+  if (customQueryHandler) {
+    return 'connected';
+  }
+  try {
+    const p = getPool();
+    await p.query('SELECT 1');
+    return 'connected';
+  } catch (e) {
+    return 'disconnected';
+  }
 }
 
 module.exports = {
   getPool,
   query,
   setQueryHandler,
-  testConnection
+  testConnection,
+  isUsingLocalDb,
+  checkHealth
 };

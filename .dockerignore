@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+.git
+.gitignore
+backend/.env
+frontend/.env
+backend/uploads/resumes/*
+!backend/uploads/resumes/.gitkeep
+hackerrank-orchestrate-october26
+**/*.log
+coverage
