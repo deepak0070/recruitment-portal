@@ -49,6 +49,7 @@ async function seed() {
         'We are seeking an experienced Senior Full-Stack Engineer to architect and build scalable web applications. You will work across Node.js, Express, React, MySQL, and modern cloud infrastructure.',
         'Remote',
         'Full-time',
+        'Senior',
         '$120,000 - $150,000',
         'open',
         adminId
@@ -58,6 +59,7 @@ async function seed() {
         'Join our UI team to build sleek, accessible, and responsive user experiences using React, Vite, and Tailwind CSS. Experience with state management and REST APIs is required.',
         'New York, NY',
         'Full-time',
+        'Junior',
         '$90,000 - $115,000',
         'open',
         adminId
@@ -67,6 +69,7 @@ async function seed() {
         'Focus on RESTful API design, database query optimization, security, and transaction management in high-throughput production environments.',
         'San Francisco, CA',
         'Contract',
+        'Mid-Level',
         '$70 - $90 / hour',
         'open',
         adminId
@@ -76,6 +79,7 @@ async function seed() {
         'Automate container deployment, monitor infrastructure performance, and ensure reliability and high availability across cloud platforms.',
         'Remote',
         'Full-time',
+        'Senior',
         '$130,000 - $160,000',
         'open',
         adminId
@@ -85,6 +89,7 @@ async function seed() {
         'Create intuitive user flows, high-fidelity prototypes, and cohesive design systems for internal enterprise tooling and consumer web applications.',
         'Austin, TX',
         'Part-time',
+        'Fresher',
         '$50,000 - $65,000',
         'closed',
         adminId
@@ -93,7 +98,7 @@ async function seed() {
 
     console.log('Inserting jobs...');
     const jobInsertQuery = `
-      INSERT INTO jobs (title, description, location, job_type, salary_range, status, created_by)
+      INSERT INTO jobs (title, description, location, job_type, experience_level, salary_range, status, created_by)
       VALUES ?
     `;
     await connection.query(jobInsertQuery, [jobs]);

@@ -156,5 +156,49 @@ describe('Jobs Module Integration Tests', () => {
 
     expect(res.status).toBe(403);
   });
+
+  it('should filter portal jobs by experience level and reject invalid values', async () => {
+    const createRes = await request(app)
+      .post('/api/jobs')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        title: 'Graduate Software Engineer',
+        description: 'Entry-level software engineering opportunity for 0-1 year freshers.',
+        location: 'Bengaluru, India',
+        job_type: 'Full-time',
+        experience_level: 'Fresher',
+        salary_range: '₹8,00,000 - ₹12,00,000'
+      });
+
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.data.experience_level).toBe('Fresher');
+
+    const filterRes = await request(app)
+      .get('/api/jobs')
+      .query({ experience: 'Fresher' });
+
+    expect(filterRes.status).toBe(200);
+    expect(filterRes.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(filterRes.body.data.every((j) => j.experience_level === 'Fresher')).toBe(true);
+
+    const invalidRes = await request(app)
+      .get('/api/jobs')
+      .query({ experience: 'InvalidLevel' });
+
+    expect(invalidRes.status).toBe(400);
+  });
+
+  it('should support experience filter on live external jobs endpoint', async () => {
+    const res = await request(app)
+      .get('/api/jobs/external/live')
+      .query({ query: 'developer', location: 'Bengaluru', experience: 'Senior' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    if (res.body.data.length > 0) {
+      expect(res.body.data[0]).toHaveProperty('experienceLevel');
+    }
+  });
 });
 

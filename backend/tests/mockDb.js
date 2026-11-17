@@ -21,6 +21,7 @@ class MockDatabase {
         description: 'Comprehensive Node.js and React fullstack role.',
         location: 'Remote',
         job_type: 'Full-time',
+        experience_level: 'Senior',
         salary_range: '$120,000 - $150,000',
         status: 'open',
         created_by: 1,
@@ -35,6 +36,7 @@ class MockDatabase {
         description: 'Database and API specialist role.',
         location: 'New York, NY',
         job_type: 'Contract',
+        experience_level: 'Mid-Level',
         salary_range: '$80 / hour',
         status: 'closed',
         created_by: 1,
@@ -88,9 +90,30 @@ class MockDatabase {
 
     // 4. COUNT(*) FROM jobs
     if (queryStr.includes('SELECT COUNT(*) as total FROM jobs')) {
-      const isOpenOnly = queryStr.includes('j.status = ?') && params[0] === 'open';
-      const count = isOpenOnly ? this.jobs.filter(j => j.status === 'open').length : this.jobs.length;
-      return [{ total: count }];
+      let result = [...this.jobs];
+      let pIdx = 0;
+      if (queryStr.includes('j.status = ?')) {
+        const statusVal = params[pIdx++];
+        result = result.filter(j => j.status === statusVal);
+      }
+      if (queryStr.includes('j.title LIKE ?')) {
+        const clean = String(params[pIdx] || '').replace(/%/g, '').toLowerCase();
+        pIdx += 2;
+        result = result.filter(j => j.title.toLowerCase().includes(clean) || j.description.toLowerCase().includes(clean));
+      }
+      if (queryStr.includes('j.location LIKE ?')) {
+        const clean = String(params[pIdx++] || '').replace(/%/g, '').toLowerCase();
+        result = result.filter(j => j.location.toLowerCase().includes(clean));
+      }
+      if (queryStr.includes('j.job_type = ?')) {
+        const typeVal = params[pIdx++];
+        result = result.filter(j => j.job_type === typeVal);
+      }
+      if (queryStr.includes('j.experience_level = ?')) {
+        const expVal = params[pIdx++];
+        result = result.filter(j => (j.experience_level || 'Mid-Level') === expVal);
+      }
+      return [{ total: result.length }];
     }
 
     // 5. SELECT single job WHERE j.id = ?
@@ -103,21 +126,41 @@ class MockDatabase {
     // 6. SELECT jobs with pagination
     if (queryStr.includes('SELECT') && queryStr.includes('FROM jobs j')) {
       let result = [...this.jobs];
+      let pIdx = 0;
       if (queryStr.includes('j.status = ?')) {
-        result = result.filter(j => j.status === params[0]);
+        const statusVal = params[pIdx++];
+        result = result.filter(j => j.status === statusVal);
+      }
+      if (queryStr.includes('j.title LIKE ?')) {
+        const clean = String(params[pIdx] || '').replace(/%/g, '').toLowerCase();
+        pIdx += 2;
+        result = result.filter(j => j.title.toLowerCase().includes(clean) || j.description.toLowerCase().includes(clean));
+      }
+      if (queryStr.includes('j.location LIKE ?')) {
+        const clean = String(params[pIdx++] || '').replace(/%/g, '').toLowerCase();
+        result = result.filter(j => j.location.toLowerCase().includes(clean));
+      }
+      if (queryStr.includes('j.job_type = ?')) {
+        const typeVal = params[pIdx++];
+        result = result.filter(j => j.job_type === typeVal);
+      }
+      if (queryStr.includes('j.experience_level = ?')) {
+        const expVal = params[pIdx++];
+        result = result.filter(j => (j.experience_level || 'Mid-Level') === expVal);
       }
       return result;
     }
 
     // 7. INSERT INTO jobs
     if (queryStr.includes('INSERT INTO jobs')) {
-      const [title, description, location, job_type, salary_range, status, created_by] = params;
+      const [title, description, location, job_type, experience_level, salary_range, status, created_by] = params;
       const newJob = {
         id: this.nextJobId++,
         title,
         description,
         location,
         job_type,
+        experience_level: experience_level || 'Mid-Level',
         salary_range,
         status: status || 'open',
         created_by,
@@ -135,9 +178,13 @@ class MockDatabase {
       const id = parseInt(params[params.length - 1], 10);
       const job = this.jobs.find(j => j.id === id);
       if (job) {
-        if (queryStr.includes('status = ?')) {
-          job.status = params[0];
-        }
+        const setSection = queryStr.split('SET ')[1].split(' WHERE')[0];
+        const fields = setSection.split(',').map((part) => part.trim().split(' =')[0]);
+        fields.forEach((field, idx) => {
+          if (field && params[idx] !== undefined) {
+            job[field] = params[idx];
+          }
+        });
       }
       return { affectedRows: 1 };
     }

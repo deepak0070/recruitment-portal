@@ -2,6 +2,62 @@ const config = require('../config');
 const JobModel = require('../models/mysql/job.model');
 const ActivityService = require('./activity.service');
 
+const EXPERIENCE_QUERY_KEYWORDS = {
+  Fresher: 'fresher',
+  Junior: 'junior',
+  'Mid-Level': '',
+  Senior: 'senior',
+  Lead: 'lead'
+};
+
+/**
+ * Infer experience level from job title & description when external API doesn't provide a dedicated field
+ */
+function inferExperienceLevel(title = '', description = '', requestedExperience = '') {
+  const text = `${title} ${description}`.toLowerCase();
+  const titleLower = title.toLowerCase();
+
+  if (/\b(lead|staff|principal|architect|director|vp|head of|8\+?\s*years?|10\+?\s*years?)\b/.test(titleLower)) {
+    return 'Lead';
+  }
+  if (/\b(fresher|intern|internship|trainee|graduate|entry[\s-]?level|campus|0[\s-]*(to|-)?[\s-]*1\s*year)\b/.test(titleLower)) {
+    return 'Fresher';
+  }
+  if (/\b(junior|jr\.?|associate|sde[\s-]?1|l1|1[\s-]*(to|-)?[\s-]*3\s*years?)\b/.test(titleLower)) {
+    return 'Junior';
+  }
+  if (/\b(senior|sr\.?|sde[\s-]?3|5\+?\s*years?|6\+?\s*years?)\b/.test(titleLower)) {
+    return 'Senior';
+  }
+
+  if (/\b(fresher|0[\s-]*(to|-)?[\s-]*1\s*year|entry[\s-]?level|graduate trainee)\b/.test(text)) {
+    return 'Fresher';
+  }
+  if (/\b(1[\s-]*(to|-)?[\s-]*3\s*years?|1[\s-]*(to|-)?[\s-]*2\s*years?|junior)\b/.test(text)) {
+    return 'Junior';
+  }
+  if (/\b(8\+?\s*years?|10\+?\s*years?|staff engineer|principal engineer|tech lead)\b/.test(text)) {
+    return 'Lead';
+  }
+  if (/\b(5\+?\s*years?|6\+?\s*years?|5[\s-]*(to|-)?[\s-]*8\s*years?|senior)\b/.test(text)) {
+    return 'Senior';
+  }
+
+  return requestedExperience || 'Mid-Level';
+}
+
+function buildExperienceQuery(baseQuery, experience) {
+  const cleanQuery = (baseQuery || '').trim() || 'developer';
+  const expKeyword = EXPERIENCE_QUERY_KEYWORDS[experience];
+  if (!expKeyword) {
+    return cleanQuery;
+  }
+  if (cleanQuery.toLowerCase().includes(expKeyword)) {
+    return cleanQuery;
+  }
+  return `${expKeyword} ${cleanQuery}`;
+}
+
 // Curated live Indian tech roles for instant preview when external API keys are pending
 const SAMPLE_INDIA_JOBS = [
   {
@@ -10,6 +66,7 @@ const SAMPLE_INDIA_JOBS = [
     company: 'Razorpay',
     location: 'Bengaluru, Karnataka',
     jobType: 'Full-time',
+    experienceLevel: 'Senior',
     salaryRange: '₹22,00,000 - ₹35,00,000',
     description: 'Looking for a Senior React Engineer with deep Node.js and SQL experience to scale checkout payments infrastructure processing millions of transactions per day.',
     applyUrl: 'https://razorpay.com/jobs',
@@ -22,6 +79,7 @@ const SAMPLE_INDIA_JOBS = [
     company: 'Swiggy',
     location: 'Bengaluru, Karnataka',
     jobType: 'Full-time',
+    experienceLevel: 'Mid-Level',
     salaryRange: '₹18,00,000 - ₹28,00,000',
     description: 'Join the Logistics & Delivery platform team. Architect low-latency distributed APIs, optimize database queries, and improve real-time tracking performance.',
     applyUrl: 'https://careers.swiggy.com',
@@ -34,6 +92,7 @@ const SAMPLE_INDIA_JOBS = [
     company: 'Zomato',
     location: 'Delhi NCR / Gurugram',
     jobType: 'Full-time',
+    experienceLevel: 'Lead',
     salaryRange: '₹30,00,000 - ₹45,00,000',
     description: 'Responsible for Kubernetes cluster management, AWS/GCP architecture, high availability, zero-downtime CI/CD automation, and disaster recovery planning.',
     applyUrl: 'https://www.zomato.com/careers',
@@ -46,8 +105,9 @@ const SAMPLE_INDIA_JOBS = [
     company: 'CRED',
     location: 'Bengaluru, Karnataka',
     jobType: 'Full-time',
-    salaryRange: '₹24,00,000 - ₹38,00,000',
-    description: 'Build sleek, hyper-responsive web and mobile web interfaces. Deep expertise in Tailwind CSS, framer-motion, state management, and modern Web APIs is required.',
+    experienceLevel: 'Junior',
+    salaryRange: '₹14,00,000 - ₹22,00,000',
+    description: 'Build sleek, hyper-responsive web and mobile web interfaces. 1-3 years experience in Tailwind CSS, React, state management, and modern Web APIs.',
     applyUrl: 'https://cred.club/careers',
     source: 'Adzuna India (Verified)',
     postedAt: new Date(Date.now() - 3600000 * 18).toISOString()
@@ -58,6 +118,7 @@ const SAMPLE_INDIA_JOBS = [
     company: 'Flipkart',
     location: 'Bengaluru, Karnataka',
     jobType: 'Full-time',
+    experienceLevel: 'Mid-Level',
     salaryRange: '₹20,00,000 - ₹32,00,000',
     description: 'Develop streaming analytics pipelines and data models supporting customer search ranking, recommendations, and inventory supply chain analytics.',
     applyUrl: 'https://www.flipkartcareers.com',
@@ -66,12 +127,13 @@ const SAMPLE_INDIA_JOBS = [
   },
   {
     id: 'in-ind-106',
-    title: 'Full-Stack Software Engineer (MERN)',
+    title: 'Software Engineer Fresher / Graduate Trainee (MERN)',
     company: 'Zepto',
     location: 'Mumbai, Maharashtra',
     jobType: 'Full-time',
-    salaryRange: '₹16,00,000 - ₹26,00,000',
-    description: 'Help scale India’s fastest 10-minute grocery delivery platform. Build customer-facing web apps and warehouse management tools using Node.js, Express, React, and MongoDB.',
+    experienceLevel: 'Fresher',
+    salaryRange: '₹8,00,000 - ₹14,00,000',
+    description: 'Great opportunity for 0-1 year freshers and graduates to help scale India’s fastest 10-minute grocery delivery platform using Node.js, Express, React, and MongoDB.',
     applyUrl: 'https://www.zeptonow.com/careers',
     source: 'Indian API Feed',
     postedAt: new Date(Date.now() - 3600000 * 30).toISOString()
@@ -82,6 +144,7 @@ const SAMPLE_INDIA_JOBS = [
     company: 'PhonePe',
     location: 'Pune / Remote',
     jobType: 'Remote',
+    experienceLevel: 'Senior',
     salaryRange: '₹25,00,000 - ₹40,00,000',
     description: 'Work with cross-functional teams to automate infrastructure, implement robust telemetry with Prometheus/Grafana, and conduct automated load simulations.',
     applyUrl: 'https://www.phonepe.com/careers',
@@ -94,7 +157,8 @@ const SAMPLE_INDIA_JOBS = [
     company: 'Infosys Ltd',
     location: 'Hyderabad, Telangana',
     jobType: 'Full-time',
-    salaryRange: '₹15,00,000 - ₹24,00,000',
+    experienceLevel: 'Lead',
+    salaryRange: '₹24,00,000 - ₹36,00,000',
     description: 'Lead engineering for global enterprise digital transformation accounts. Expertise in Spring Boot, microservices architecture, and relational database tuning.',
     applyUrl: 'https://www.infosys.com/careers',
     source: 'Adzuna India (Verified)',
@@ -106,7 +170,7 @@ class ExternalJobsService {
   /**
    * Fetch jobs from Adzuna API (dedicated India endpoint: api.adzuna.com/v1/api/jobs/in)
    */
-  static async fetchFromAdzuna({ query = '', location = '', page = 1, limit = 10 }) {
+  static async fetchFromAdzuna({ query = '', location = '', experience = '', page = 1, limit = 10 }) {
     const { appId, appKey, country } = config.externalJobs.adzuna;
     if (!appId || !appKey) {
       return null;
@@ -114,7 +178,8 @@ class ExternalJobsService {
 
     try {
       const endpointCountry = country || 'in';
-      const encodedQuery = encodeURIComponent(query || 'developer');
+      const searchQuery = buildExperienceQuery(query, experience);
+      const encodedQuery = encodeURIComponent(searchQuery);
       const encodedLocation = encodeURIComponent(location || 'India');
       const url = `https://api.adzuna.com/v1/api/jobs/${endpointCountry}/search/${page}?app_id=${appId}&app_key=${appKey}&results_per_page=${limit}&what=${encodedQuery}&where=${encodedLocation}&content-type=application/json`;
 
@@ -131,14 +196,18 @@ class ExternalJobsService {
           salary = `₹${Math.round(item.salary_min).toLocaleString('en-IN')} - ₹${Math.round(item.salary_max).toLocaleString('en-IN')}`;
         }
 
+        const cleanTitle = item.title?.replace(/<\/?[^>]+(>|$)/g, '') || 'Position';
+        const cleanDesc = item.description?.replace(/<\/?[^>]+(>|$)/g, '') || '';
+
         return {
           id: `adzuna-${item.id}`,
-          title: item.title?.replace(/<\/?[^>]+(>|$)/g, '') || 'Position',
+          title: cleanTitle,
           company: item.company?.display_name || 'Company',
           location: item.location?.display_name || location || 'India',
           jobType: item.contract_time === 'part_time' ? 'Part-time' : item.contract_type === 'contract' ? 'Contract' : 'Full-time',
+          experienceLevel: inferExperienceLevel(cleanTitle, cleanDesc, experience),
           salaryRange: salary,
-          description: item.description?.replace(/<\/?[^>]+(>|$)/g, '') || '',
+          description: cleanDesc,
           applyUrl: item.redirect_url,
           source: 'Adzuna India',
           postedAt: item.created
@@ -159,7 +228,7 @@ class ExternalJobsService {
   /**
    * Fetch jobs from Jooble API (POST https://jooble.org/api/{apiKey})
    */
-  static async fetchFromJooble({ query = '', location = '', page = 1 }) {
+  static async fetchFromJooble({ query = '', location = '', experience = '', page = 1 }) {
     const { apiKey } = config.externalJobs.jooble;
     if (!apiKey) {
       return null;
@@ -167,11 +236,12 @@ class ExternalJobsService {
 
     try {
       const url = `https://jooble.org/api/${apiKey}`;
+      const searchQuery = buildExperienceQuery(query, experience);
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          keywords: query || 'developer',
+          keywords: searchQuery,
           location: location || 'India',
           page
         })
@@ -183,18 +253,24 @@ class ExternalJobsService {
       }
 
       const data = await response.json();
-      const results = (data.jobs || []).map((item) => ({
-        id: `jooble-${item.id}`,
-        title: item.title?.replace(/<\/?[^>]+(>|$)/g, '') || 'Position',
-        company: item.company || 'Company',
-        location: item.location || location || 'India',
-        jobType: item.type || 'Full-time',
-        salaryRange: item.salary || null,
-        description: item.snippet?.replace(/<\/?[^>]+(>|$)/g, '') || '',
-        applyUrl: item.link,
-        source: 'Jooble (India)',
-        postedAt: item.updated
-      }));
+      const results = (data.jobs || []).map((item) => {
+        const cleanTitle = item.title?.replace(/<\/?[^>]+(>|$)/g, '') || 'Position';
+        const cleanDesc = item.snippet?.replace(/<\/?[^>]+(>|$)/g, '') || '';
+
+        return {
+          id: `jooble-${item.id}`,
+          title: cleanTitle,
+          company: item.company || 'Company',
+          location: item.location || location || 'India',
+          jobType: item.type || 'Full-time',
+          experienceLevel: inferExperienceLevel(cleanTitle, cleanDesc, experience),
+          salaryRange: item.salary || null,
+          description: cleanDesc,
+          applyUrl: item.link,
+          source: 'Jooble (India)',
+          postedAt: item.updated
+        };
+      });
 
       return {
         jobs: results,
@@ -210,10 +286,10 @@ class ExternalJobsService {
   /**
    * Search real-time jobs from Adzuna / Jooble with automatic live fallback
    */
-  static async searchLiveJobs({ query = '', location = '', page = 1, limit = 10, provider = 'all' }) {
+  static async searchLiveJobs({ query = '', location = '', experience = '', page = 1, limit = 10, provider = 'all' }) {
     // 1. Try Adzuna if configured or requested
     if (provider === 'adzuna' || provider === 'all') {
-      const adzunaResult = await this.fetchFromAdzuna({ query, location, page, limit });
+      const adzunaResult = await this.fetchFromAdzuna({ query, location, experience, page, limit });
       if (adzunaResult && adzunaResult.jobs.length > 0) {
         return adzunaResult;
       }
@@ -221,7 +297,7 @@ class ExternalJobsService {
 
     // 2. Try Jooble if configured or requested
     if (provider === 'jooble' || provider === 'all') {
-      const joobleResult = await this.fetchFromJooble({ query, location, page });
+      const joobleResult = await this.fetchFromJooble({ query, location, experience, page });
       if (joobleResult && joobleResult.jobs.length > 0) {
         return joobleResult;
       }
@@ -243,6 +319,11 @@ class ExternalJobsService {
     if (location && location.trim()) {
       const loc = location.trim().toLowerCase();
       filtered = filtered.filter((j) => j.location.toLowerCase().includes(loc));
+    }
+
+    if (experience && experience.trim()) {
+      const exp = experience.trim().toLowerCase();
+      filtered = filtered.filter((j) => (j.experienceLevel || '').toLowerCase() === exp);
     }
 
     const pageNum = Math.max(1, parseInt(page, 10));
@@ -268,11 +349,13 @@ class ExternalJobsService {
    * Import an external job into the portal's database (Admin only)
    */
   static async importJobToPortal(jobData, adminUser) {
+    const inferredExp = jobData.experienceLevel || inferExperienceLevel(jobData.title, jobData.description);
     const newJob = await JobModel.create({
       title: jobData.title,
       description: `${jobData.description}\n\n[Original Source: ${jobData.source || 'External'}]\n[Direct Apply Link: ${jobData.applyUrl || ''}]`,
       location: jobData.location,
       job_type: jobData.jobType || 'Full-time',
+      experience_level: inferredExp,
       salary_range: jobData.salaryRange || null,
       status: 'open',
       created_by: adminUser.id

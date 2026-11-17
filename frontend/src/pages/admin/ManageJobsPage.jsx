@@ -33,6 +33,7 @@ export default function ManageJobsPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importSearch, setImportSearch] = useState('');
   const [importLocation, setImportLocation] = useState('Bengaluru');
+  const [importExperience, setImportExperience] = useState('');
   const [importProvider, setImportProvider] = useState('all');
   const [importJobs, setImportJobs] = useState([]);
   const [importLoading, setImportLoading] = useState(false);
@@ -44,6 +45,7 @@ export default function ManageJobsPage() {
     description: '',
     location: '',
     job_type: 'Full-time',
+    experience_level: 'Mid-Level',
     salary_range: '',
     status: 'open'
   });
@@ -67,6 +69,7 @@ export default function ManageJobsPage() {
         params: {
           query: importSearch,
           location: importLocation,
+          ...(importExperience && { experience: importExperience }),
           provider: importProvider,
           limit: 6
         }
@@ -97,6 +100,7 @@ export default function ManageJobsPage() {
       description: '',
       location: '',
       job_type: 'Full-time',
+      experience_level: 'Mid-Level',
       salary_range: '',
       status: 'open'
     });
@@ -111,6 +115,7 @@ export default function ManageJobsPage() {
       description: job.description,
       location: job.location,
       job_type: job.job_type,
+      experience_level: job.experience_level || 'Mid-Level',
       salary_range: job.salary_range || '',
       status: job.status
     });
@@ -232,8 +237,13 @@ export default function ManageJobsPage() {
                           <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           <span>{job.location}</span>
                         </div>
-                        <div className="mt-1">
+                        <div className="mt-1 flex items-center gap-1.5 flex-wrap">
                           <Badge status={job.job_type} />
+                          {job.experience_level && (
+                            <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/60">
+                              {job.experience_level}
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
@@ -363,7 +373,24 @@ export default function ManageJobsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
+                  Experience Level
+                </label>
+                <select
+                  value={formData.experience_level}
+                  onChange={(e) => setFormData({ ...formData, experience_level: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                  <option value="Fresher">Fresher (0–1 yrs)</option>
+                  <option value="Junior">Junior (1–3 yrs)</option>
+                  <option value="Mid-Level">Mid-Level (3–5 yrs)</option>
+                  <option value="Senior">Senior (5+ yrs)</option>
+                  <option value="Lead">Lead / Staff (8+ yrs)</option>
+                </select>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">
                   Salary Range
@@ -372,7 +399,7 @@ export default function ManageJobsPage() {
                   type="text"
                   value={formData.salary_range}
                   onChange={(e) => setFormData({ ...formData, salary_range: e.target.value })}
-                  placeholder="e.g. $100k - $130k / year"
+                  placeholder="e.g. ₹12L - ₹18L / year"
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
@@ -386,7 +413,7 @@ export default function ManageJobsPage() {
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 >
-                  <option value="open">Open (Accepting Applications)</option>
+                  <option value="open">Open</option>
                   <option value="closed">Closed</option>
                 </select>
               </div>
@@ -471,6 +498,19 @@ export default function ManageJobsPage() {
                   className="w-full text-xs outline-none py-1 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
+
+              <select
+                value={importExperience}
+                onChange={(e) => setImportExperience(e.target.value)}
+                className="px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 font-medium"
+              >
+                <option value="">All Experience</option>
+                <option value="Fresher">Fresher (0–1 yrs)</option>
+                <option value="Junior">Junior (1–3 yrs)</option>
+                <option value="Mid-Level">Mid-Level (3–5 yrs)</option>
+                <option value="Senior">Senior (5+ yrs)</option>
+                <option value="Lead">Lead (8+ yrs)</option>
+              </select>
 
               <select
                 value={importProvider}

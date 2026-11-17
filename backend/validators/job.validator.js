@@ -1,5 +1,7 @@
 const { body, query, param } = require('express-validator');
 
+const VALID_EXPERIENCE_LEVELS = ['Fresher', 'Junior', 'Mid-Level', 'Senior', 'Lead'];
+
 const createJobValidator = [
   body('title')
     .trim()
@@ -15,6 +17,10 @@ const createJobValidator = [
   body('job_type')
     .trim()
     .notEmpty().withMessage('Job type is required'),
+  body('experience_level')
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isIn(VALID_EXPERIENCE_LEVELS).withMessage(`Experience level must be one of: ${VALID_EXPERIENCE_LEVELS.join(', ')}`),
   body('salary_range')
     .optional({ nullable: true })
     .trim(),
@@ -42,6 +48,10 @@ const updateJobValidator = [
     .optional()
     .trim()
     .notEmpty().withMessage('Job type cannot be empty'),
+  body('experience_level')
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isIn(VALID_EXPERIENCE_LEVELS).withMessage(`Experience level must be one of: ${VALID_EXPERIENCE_LEVELS.join(', ')}`),
   body('salary_range')
     .optional({ nullable: true })
     .trim(),
@@ -59,7 +69,11 @@ const getJobsValidator = [
     .isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
   query('status')
     .optional()
-    .isIn(['open', 'closed', 'all']).withMessage('Status must be open, closed, or all')
+    .isIn(['open', 'closed', 'all']).withMessage('Status must be open, closed, or all'),
+  query('experience')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isIn(VALID_EXPERIENCE_LEVELS).withMessage(`Experience filter must be one of: ${VALID_EXPERIENCE_LEVELS.join(', ')}`)
 ];
 
 const jobIdValidator = [

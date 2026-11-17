@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     description TEXT NOT NULL,
     location VARCHAR(100) NOT NULL,
     job_type VARCHAR(50) NOT NULL,
+    experience_level VARCHAR(50) NOT NULL DEFAULT 'Mid-Level',
     salary_range VARCHAR(100) NULL,
     status ENUM('open', 'closed') NOT NULL DEFAULT 'open',
     created_by INT NOT NULL,
@@ -30,7 +31,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     INDEX idx_jobs_status (status),
     INDEX idx_jobs_created_by (created_by),
     INDEX idx_jobs_location (location),
-    INDEX idx_jobs_job_type (job_type)
+    INDEX idx_jobs_job_type (job_type),
+    INDEX idx_jobs_experience (experience_level)
 ) ENGINE=InnoDB;
 
 -- 3. Applications Table

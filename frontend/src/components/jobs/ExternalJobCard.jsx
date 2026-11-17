@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, MapPin, IndianRupee, ExternalLink, Download, Check, Sparkles } from 'lucide-react';
+import { Building2, MapPin, IndianRupee, ExternalLink, Download, Check, Sparkles, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/client';
 
@@ -18,6 +18,7 @@ export default function ExternalJobCard({ job, onImportSuccess }) {
         description: job.description || `${job.title} at ${job.company}`,
         location: job.location,
         jobType: job.jobType || 'Full-time',
+        experienceLevel: job.experienceLevel || 'Mid-Level',
         salaryRange: job.salaryRange || null,
         applyUrl: job.applyUrl,
         source: job.source || 'External Job Feed'
@@ -43,16 +44,24 @@ export default function ExternalJobCard({ job, onImportSuccess }) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-6 hover:shadow-lg hover:border-emerald-300 dark:hover:border-emerald-500/50 transition duration-200 group flex flex-col justify-between relative overflow-hidden">
       {/* Top Banner tag */}
-      <div className="flex items-center justify-between gap-2 mb-3">
+      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
           <Sparkles className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
           {job.source || 'Live Feed'}
         </span>
-        {job.jobType && (
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-            {job.jobType}
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {job.experienceLevel && (
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 px-2 py-0.5 rounded-md">
+              <Award className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+              {job.experienceLevel}
+            </span>
+          )}
+          {job.jobType && (
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+              {job.jobType}
+            </span>
+          )}
+        </div>
       </div>
 
       <div>

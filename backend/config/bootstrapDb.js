@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     description TEXT NOT NULL,
     location VARCHAR(100) NOT NULL,
     job_type VARCHAR(50) NOT NULL,
+    experience_level VARCHAR(50) NOT NULL DEFAULT 'Mid-Level',
     salary_range VARCHAR(100) NULL,
     status ENUM('open', 'closed') NOT NULL DEFAULT 'open',
     created_by INT NOT NULL,
@@ -30,7 +31,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     INDEX idx_jobs_status (status),
     INDEX idx_jobs_created_by (created_by),
     INDEX idx_jobs_location (location),
-    INDEX idx_jobs_job_type (job_type)
+    INDEX idx_jobs_job_type (job_type),
+    INDEX idx_jobs_experience (experience_level)
 ) ENGINE=InnoDB;
 `;
 
@@ -66,6 +68,21 @@ async function ensureSchemaAndSeed() {
     await pool.query(CREATE_USERS_SQL);
     await pool.query(CREATE_JOBS_SQL);
     await pool.query(CREATE_APPLICATIONS_SQL);
+
+    // Safe migration: add experience_level column to existing jobs tables if missing
+    const [expCols] = await pool.query("SHOW COLUMNS FROM jobs LIKE 'experience_level'");
+    if (expCols.length === 0) {
+      console.log('🔧 [MySQL] Migrating jobs table: adding experience_level column...');
+      await pool.query(
+        "ALTER TABLE jobs ADD COLUMN experience_level VARCHAR(50) NOT NULL DEFAULT 'Mid-Level' AFTER job_type, ADD INDEX idx_jobs_experience (experience_level)"
+      );
+      await pool.query("UPDATE jobs SET experience_level = 'Senior' WHERE LOWER(title) LIKE '%senior%' OR LOWER(title) LIKE '%devops%'");
+      await pool.query("UPDATE jobs SET experience_level = 'Lead' WHERE LOWER(title) LIKE '%lead%' OR LOWER(title) LIKE '%staff%' OR LOWER(title) LIKE '%architect%'");
+      await pool.query("UPDATE jobs SET experience_level = 'Junior' WHERE LOWER(title) LIKE '%frontend%' OR LOWER(title) LIKE '%junior%' OR LOWER(title) LIKE '%associate%'");
+      await pool.query("UPDATE jobs SET experience_level = 'Fresher' WHERE LOWER(title) LIKE '%intern%' OR LOWER(title) LIKE '%fresher%' OR LOWER(title) LIKE '%designer%'");
+      console.log('✅ [MySQL] experience_level migration complete.');
+    }
+
     console.log('✅ [MySQL] Schema verified (users, jobs, applications).');
 
     const [rows] = await pool.query('SELECT COUNT(*) AS count FROM users');
@@ -90,6 +107,7 @@ async function ensureSchemaAndSeed() {
           'We are seeking an experienced Senior Full-Stack Engineer to architect and build scalable web applications. You will work across Node.js, Express, React, MySQL, and modern cloud infrastructure.',
           'Remote',
           'Full-time',
+          'Senior',
           '$120,000 - $150,000',
           'open',
           adminId
@@ -99,6 +117,7 @@ async function ensureSchemaAndSeed() {
           'Join our UI team to build sleek, accessible, and responsive user experiences using React, Vite, and Tailwind CSS. Experience with state management and REST APIs is required.',
           'New York, NY',
           'Full-time',
+          'Junior',
           '$90,000 - $115,000',
           'open',
           adminId
@@ -108,6 +127,7 @@ async function ensureSchemaAndSeed() {
           'Focus on RESTful API design, database query optimization, security, and transaction management in high-throughput production environments.',
           'San Francisco, CA',
           'Contract',
+          'Mid-Level',
           '$70 - $90 / hour',
           'open',
           adminId
@@ -117,6 +137,7 @@ async function ensureSchemaAndSeed() {
           'Automate container deployment, monitor infrastructure performance, and ensure reliability and high availability across cloud platforms.',
           'Remote',
           'Full-time',
+          'Senior',
           '$130,000 - $160,000',
           'open',
           adminId
@@ -126,13 +147,14 @@ async function ensureSchemaAndSeed() {
           'Create intuitive user flows, high-fidelity prototypes, and cohesive design systems for internal enterprise tooling and consumer web applications.',
           'Austin, TX',
           'Part-time',
+          'Fresher',
           '$50,000 - $65,000',
           'closed',
           adminId
         ]
       ];
       await pool.query(
-        'INSERT INTO jobs (title, description, location, job_type, salary_range, status, created_by) VALUES ?',
+        'INSERT INTO jobs (title, description, location, job_type, experience_level, salary_range, status, created_by) VALUES ?',
         [jobs]
       );
       console.log('✅ [MySQL] Initial seed complete (admin@recruitment.com / Password@123).');

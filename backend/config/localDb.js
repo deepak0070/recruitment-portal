@@ -50,6 +50,7 @@ class LocalDatabase {
         description: 'We are seeking an experienced Senior Full-Stack Engineer to architect and build scalable web applications. You will work across Node.js, Express, React, MySQL, and modern cloud infrastructure.',
         location: 'Remote',
         job_type: 'Full-time',
+        experience_level: 'Senior',
         salary_range: '$120,000 - $150,000',
         status: 'open',
         created_by: 1,
@@ -64,6 +65,7 @@ class LocalDatabase {
         description: 'Join our UI team to build sleek, accessible, and responsive user experiences using React, Vite, and Tailwind CSS. Experience with state management and REST APIs is required.',
         location: 'New York, NY',
         job_type: 'Full-time',
+        experience_level: 'Junior',
         salary_range: '$90,000 - $115,000',
         status: 'open',
         created_by: 1,
@@ -78,6 +80,7 @@ class LocalDatabase {
         description: 'Focus on RESTful API design, database query optimization, security, and transaction management in high-throughput production environments.',
         location: 'San Francisco, CA',
         job_type: 'Contract',
+        experience_level: 'Mid-Level',
         salary_range: '$70 - $90 / hour',
         status: 'open',
         created_by: 1,
@@ -92,6 +95,7 @@ class LocalDatabase {
         description: 'Automate container deployment, monitor infrastructure performance, and ensure reliability and high availability across cloud platforms.',
         location: 'Remote',
         job_type: 'Full-time',
+        experience_level: 'Senior',
         salary_range: '$130,000 - $160,000',
         status: 'open',
         created_by: 1,
@@ -106,6 +110,7 @@ class LocalDatabase {
         description: 'Create intuitive user flows, high-fidelity prototypes, and cohesive design systems for internal enterprise tooling and consumer web applications.',
         location: 'Austin, TX',
         job_type: 'Part-time',
+        experience_level: 'Fresher',
         salary_range: '$50,000 - $65,000',
         status: 'closed',
         created_by: 1,
@@ -206,8 +211,27 @@ class LocalDatabase {
     // 4. COUNT(*) FROM jobs
     if (queryStr.includes('SELECT COUNT(*) as total FROM jobs')) {
       let filtered = [...this.jobs];
+      let pIdx = 0;
       if (queryStr.includes('j.status = ?')) {
-        filtered = filtered.filter(j => j.status === params[0]);
+        const statusVal = params[pIdx++];
+        filtered = filtered.filter(j => j.status === statusVal);
+      }
+      if (queryStr.includes('j.title LIKE ?')) {
+        const clean = String(params[pIdx] || '').replace(/%/g, '').toLowerCase();
+        pIdx += 2;
+        filtered = filtered.filter(j => j.title.toLowerCase().includes(clean) || j.description.toLowerCase().includes(clean));
+      }
+      if (queryStr.includes('j.location LIKE ?')) {
+        const clean = String(params[pIdx++] || '').replace(/%/g, '').toLowerCase();
+        filtered = filtered.filter(j => j.location.toLowerCase().includes(clean));
+      }
+      if (queryStr.includes('j.job_type = ?')) {
+        const typeVal = params[pIdx++];
+        filtered = filtered.filter(j => j.job_type === typeVal);
+      }
+      if (queryStr.includes('j.experience_level = ?')) {
+        const expVal = params[pIdx++];
+        filtered = filtered.filter(j => (j.experience_level || 'Mid-Level') === expVal);
       }
       return [{ total: filtered.length }];
     }
@@ -216,43 +240,39 @@ class LocalDatabase {
     if (queryStr.includes('WHERE j.id = ?')) {
       const id = parseInt(params[0], 10);
       const job = this.jobs.find(j => j.id === id);
-      return job ? [{ ...job, applicant_count: this.applications.filter(a => a.job_id === job.id).length }] : [];
+      return job ? [{ ...job, experience_level: job.experience_level || 'Mid-Level', applicant_count: this.applications.filter(a => a.job_id === job.id).length }] : [];
     }
 
     // 6. SELECT jobs with pagination & filters
     if (queryStr.includes('SELECT') && queryStr.includes('FROM jobs j')) {
       let list = [...this.jobs];
-      // status filter
+      let pIdx = 0;
       if (queryStr.includes('j.status = ?')) {
-        list = list.filter(j => j.status === params[0]);
+        const statusVal = params[pIdx++];
+        list = list.filter(j => j.status === statusVal);
       }
-      // search filter
       if (queryStr.includes('j.title LIKE ?')) {
-        const keyword = params.find(p => typeof p === 'string' && p.startsWith('%') && p.endsWith('%'));
-        if (keyword) {
-          const clean = keyword.replace(/%/g, '').toLowerCase();
-          list = list.filter(j => j.title.toLowerCase().includes(clean) || j.description.toLowerCase().includes(clean));
-        }
+        const clean = String(params[pIdx] || '').replace(/%/g, '').toLowerCase();
+        pIdx += 2;
+        list = list.filter(j => j.title.toLowerCase().includes(clean) || j.description.toLowerCase().includes(clean));
       }
-      // location filter
       if (queryStr.includes('j.location LIKE ?')) {
-        const loc = params.find(p => typeof p === 'string' && p.startsWith('%') && p.endsWith('%'));
-        if (loc) {
-          const clean = loc.replace(/%/g, '').toLowerCase();
-          list = list.filter(j => j.location.toLowerCase().includes(clean));
-        }
+        const clean = String(params[pIdx++] || '').replace(/%/g, '').toLowerCase();
+        list = list.filter(j => j.location.toLowerCase().includes(clean));
       }
-      // job type filter
       if (queryStr.includes('j.job_type = ?')) {
-        const typeParam = params.find(p => ['Full-time', 'Part-time', 'Contract', 'Remote'].includes(p));
-        if (typeParam) {
-          list = list.filter(j => j.job_type === typeParam);
-        }
+        const typeVal = params[pIdx++];
+        list = list.filter(j => j.job_type === typeVal);
+      }
+      if (queryStr.includes('j.experience_level = ?')) {
+        const expVal = params[pIdx++];
+        list = list.filter(j => (j.experience_level || 'Mid-Level') === expVal);
       }
 
       // attach applicant counts
       list = list.map(j => ({
         ...j,
+        experience_level: j.experience_level || 'Mid-Level',
         applicant_count: this.applications.filter(a => a.job_id === j.id).length
       }));
 
@@ -264,13 +284,14 @@ class LocalDatabase {
 
     // 7. INSERT INTO jobs
     if (queryStr.includes('INSERT INTO jobs')) {
-      const [title, description, location, job_type, salary_range, status, created_by] = params;
+      const [title, description, location, job_type, experience_level, salary_range, status, created_by] = params;
       const newJob = {
         id: this.nextJobId++,
         title,
         description,
         location,
         job_type,
+        experience_level: experience_level || 'Mid-Level',
         salary_range,
         status: status || 'open',
         created_by,
@@ -289,11 +310,13 @@ class LocalDatabase {
       const id = parseInt(params[params.length - 1], 10);
       const job = this.jobs.find(j => j.id === id);
       if (job) {
-        if (queryStr.includes('title = ?')) job.title = params[0];
-        if (queryStr.includes('status = ?')) {
-          const st = params.find(p => ['open', 'closed'].includes(p));
-          if (st) job.status = st;
-        }
+        const setSection = queryStr.split('SET ')[1].split(' WHERE')[0];
+        const fields = setSection.split(',').map((part) => part.trim().split(' =')[0]);
+        fields.forEach((field, idx) => {
+          if (field && params[idx] !== undefined) {
+            job[field] = params[idx];
+          }
+        });
         job.updated_at = new Date().toISOString();
         this.save();
       }

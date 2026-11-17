@@ -7,10 +7,11 @@ class ExternalJobsController {
    */
   static async getLiveJobs(req, res, next) {
     try {
-      const { query, location, page, limit, provider } = req.query;
+      const { query, location, experience, page, limit, provider } = req.query;
       const result = await ExternalJobsService.searchLiveJobs({
         query: query ? String(query).trim() : '',
         location: location ? String(location).trim() : '',
+        experience: experience ? String(experience).trim() : '',
         page: page ? parseInt(page, 10) : 1,
         limit: limit ? parseInt(limit, 10) : 10,
         provider: provider ? String(provider).toLowerCase() : 'all'
@@ -39,7 +40,7 @@ class ExternalJobsController {
    */
   static async importJob(req, res, next) {
     try {
-      const { title, description, location, jobType, salaryRange, applyUrl, source } = req.body;
+      const { title, description, location, jobType, experienceLevel, salaryRange, applyUrl, source } = req.body;
 
       if (!title || !description || !location) {
         return res.status(400).json({
@@ -54,6 +55,7 @@ class ExternalJobsController {
           description,
           location,
           jobType,
+          experienceLevel,
           salaryRange,
           applyUrl,
           source

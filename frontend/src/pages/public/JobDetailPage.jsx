@@ -4,7 +4,7 @@ import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import Badge from '../../components/common/Badge';
 import ApplyModal from '../../components/jobs/ApplyModal';
-import { MapPin, DollarSign, Clock, User, ArrowLeft, Send, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { MapPin, DollarSign, Clock, User, ArrowLeft, Send, CheckCircle2, ShieldAlert, Award } from 'lucide-react';
 
 export default function JobDetailPage() {
   const { id } = useParams();
@@ -142,6 +142,12 @@ export default function JobDetailPage() {
                 <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <span>{job.location}</span>
               </div>
+              {job.experience_level && (
+                <div className="inline-flex items-center gap-1.5 font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 px-2.5 py-0.5 rounded-md text-xs">
+                  <Award className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                  <span>{job.experience_level}</span>
+                </div>
+              )}
               {job.salary_range && (
                 <div className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200">
                   <DollarSign className="w-4 h-4 text-emerald-500" />

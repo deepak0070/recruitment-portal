@@ -11,6 +11,7 @@ class JobService {
       search,
       location,
       jobType,
+      experience,
       status,
       page = 1,
       limit = 10
@@ -24,6 +25,7 @@ class JobService {
       search,
       location,
       jobType,
+      experience,
       status: effectiveStatus,
       page,
       limit

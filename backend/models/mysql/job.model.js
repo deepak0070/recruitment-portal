@@ -8,6 +8,7 @@ class JobModel {
     search = '',
     location = '',
     jobType = '',
+    experience = '',
     status = 'open',
     page = 1,
     limit = 10
@@ -39,6 +40,12 @@ class JobModel {
       params.push(jobType.trim());
     }
 
+    // Filter by experience level
+    if (experience && experience.trim() !== '') {
+      conditions.push('j.experience_level = ?');
+      params.push(experience.trim());
+    }
+
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     // Count total matching records
@@ -59,6 +66,7 @@ class JobModel {
         j.description, 
         j.location, 
         j.job_type, 
+        j.experience_level,
         j.salary_range, 
         j.status, 
         j.created_by, 
@@ -97,6 +105,7 @@ class JobModel {
         j.description, 
         j.location, 
         j.job_type, 
+        j.experience_level,
         j.salary_range, 
         j.status, 
         j.created_by, 
@@ -121,19 +130,21 @@ class JobModel {
     description,
     location,
     job_type,
+    experience_level = 'Mid-Level',
     salary_range = null,
     status = 'open',
     created_by
   }) {
     const sql = `
-      INSERT INTO jobs (title, description, location, job_type, salary_range, status, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO jobs (title, description, location, job_type, experience_level, salary_range, status, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const result = await query(sql, [
       title.trim(),
       description.trim(),
       location.trim(),
       job_type.trim(),
+      (experience_level || 'Mid-Level').trim(),
       salary_range ? salary_range.trim() : null,
       status,
       created_by
@@ -146,7 +157,7 @@ class JobModel {
    * Update an existing job posting
    */
   static async update(id, fields) {
-    const allowedFields = ['title', 'description', 'location', 'job_type', 'salary_range', 'status'];
+    const allowedFields = ['title', 'description', 'location', 'job_type', 'experience_level', 'salary_range', 'status'];
     const setClauses = [];
     const params = [];
 

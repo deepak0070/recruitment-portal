@@ -12,10 +12,20 @@ import {
   Globe,
   Sparkles,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  Award
 } from 'lucide-react';
 
 const INDIA_CITIES = ['All India', 'Bengaluru', 'Delhi NCR', 'Mumbai', 'Hyderabad', 'Pune', 'Remote'];
+
+const EXPERIENCE_LEVELS = [
+  { value: '', label: 'All Experience', shortLabel: 'All Levels' },
+  { value: 'Fresher', label: 'Fresher (0–1 yrs)', shortLabel: 'Fresher (0–1 yrs)' },
+  { value: 'Junior', label: 'Junior (1–3 yrs)', shortLabel: 'Junior (1–3 yrs)' },
+  { value: 'Mid-Level', label: 'Mid-Level (3–5 yrs)', shortLabel: 'Mid-Level (3–5 yrs)' },
+  { value: 'Senior', label: 'Senior (5+ yrs)', shortLabel: 'Senior (5+ yrs)' },
+  { value: 'Lead', label: 'Lead / Staff (8+ yrs)', shortLabel: 'Lead (8+ yrs)' }
+];
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('portal'); // 'portal' | 'live_india'
@@ -36,18 +46,26 @@ export default function HomePage() {
   const [search, setSearch] = useState('');
   const [location, setLocation] = useState('');
   const [jobType, setJobType] = useState('');
+  const [experience, setExperience] = useState('');
   const [page, setPage] = useState(1);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (overrides = {}) => {
     setLoading(true);
     try {
+      const effectiveSearch = overrides.search !== undefined ? overrides.search : search;
+      const effectiveLocation = overrides.location !== undefined ? overrides.location : location;
+      const effectiveJobType = overrides.jobType !== undefined ? overrides.jobType : jobType;
+      const effectiveExperience = overrides.experience !== undefined ? overrides.experience : experience;
+      const effectivePage = overrides.page !== undefined ? overrides.page : page;
+
       const params = {
-        page,
+        page: effectivePage,
         limit: 6,
         status: 'open',
-        ...(search && { search }),
-        ...(location && { location }),
-        ...(jobType && { jobType })
+        ...(effectiveSearch && { search: effectiveSearch }),
+        ...(effectiveLocation && { location: effectiveLocation }),
+        ...(effectiveJobType && { jobType: effectiveJobType }),
+        ...(effectiveExperience && { experience: effectiveExperience })
       };
       const res = await api.get('/jobs', { params });
       setJobs(res.data.data);
@@ -59,15 +77,22 @@ export default function HomePage() {
     }
   };
 
-  const fetchExternalJobs = async () => {
+  const fetchExternalJobs = async (overrides = {}) => {
     setExtLoading(true);
     try {
+      const effectiveSearch = overrides.search !== undefined ? overrides.search : search;
+      const effectiveLocation = overrides.location !== undefined ? overrides.location : location;
+      const effectiveExperience = overrides.experience !== undefined ? overrides.experience : experience;
+      const effectiveProvider = overrides.provider !== undefined ? overrides.provider : extProvider;
+      const effectivePage = overrides.page !== undefined ? overrides.page : page;
+
       const params = {
-        page,
+        page: effectivePage,
         limit: 9,
-        query: search,
-        location: location === 'All India' ? '' : location,
-        provider: extProvider
+        query: effectiveSearch,
+        location: effectiveLocation === 'All India' ? '' : effectiveLocation,
+        ...(effectiveExperience && { experience: effectiveExperience }),
+        provider: effectiveProvider
       };
       const res = await api.get('/jobs/external/live', { params });
       setExternalJobs(res.data.data);
@@ -85,15 +110,15 @@ export default function HomePage() {
     } else {
       fetchExternalJobs();
     }
-  }, [activeTab, page, jobType, extProvider]);
+  }, [activeTab, page, jobType, experience, extProvider]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setPage(1);
     if (activeTab === 'portal') {
-      fetchJobs();
+      fetchJobs({ page: 1 });
     } else {
-      fetchExternalJobs();
+      fetchExternalJobs({ page: 1 });
     }
   };
 
@@ -101,11 +126,12 @@ export default function HomePage() {
     setSearch('');
     setLocation('');
     setJobType('');
+    setExperience('');
     setPage(1);
     if (activeTab === 'portal') {
-      setTimeout(fetchJobs, 0);
+      fetchJobs({ search: '', location: '', jobType: '', experience: '', page: 1 });
     } else {
-      setTimeout(fetchExternalJobs, 0);
+      fetchExternalJobs({ search: '', location: '', experience: '', page: 1 });
     }
   };
 
@@ -114,18 +140,9 @@ export default function HomePage() {
     setLocation(newLoc);
     setPage(1);
     if (activeTab === 'live_india') {
-      setExtLoading(true);
-      api
-        .get('/jobs/external/live', {
-          params: { page: 1, limit: 9, query: search, location: newLoc, provider: extProvider }
-        })
-        .then((res) => {
-          setExternalJobs(res.data.data);
-          setExtPagination(res.data.pagination);
-        })
-        .finally(() => setExtLoading(false));
+      fetchExternalJobs({ location: newLoc, page: 1 });
     } else {
-      fetchJobs();
+      fetchJobs({ location: newLoc, page: 1 });
     }
   };
 
@@ -176,6 +193,25 @@ export default function HomePage() {
                 placeholder="Location (e.g. Bengaluru, Delhi, Remote)..."
                 className="w-full text-sm outline-none bg-transparent text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-2 w-full md:w-auto border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800">
+              <Award className="w-5 h-5 text-slate-400 dark:text-slate-500 shrink-0" />
+              <select
+                aria-label="Filter by experience level"
+                value={experience}
+                onChange={(e) => {
+                  setExperience(e.target.value);
+                  setPage(1);
+                }}
+                className="text-sm outline-none bg-transparent w-full cursor-pointer text-slate-700 dark:text-slate-200 dark:bg-slate-900"
+              >
+                {EXPERIENCE_LEVELS.map((lvl) => (
+                  <option key={lvl.value || 'all'} value={lvl.value} className="dark:bg-slate-900">
+                    {lvl.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {activeTab === 'portal' ? (
@@ -237,6 +273,28 @@ export default function HomePage() {
                 }`}
               >
                 {city}
+              </button>
+            ))}
+          </div>
+
+          {/* Quick experience filter pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-2.5 text-xs">
+            <span className="text-indigo-300 font-medium mr-1">Experience:</span>
+            {EXPERIENCE_LEVELS.map((lvl) => (
+              <button
+                key={lvl.value || 'all-exp'}
+                type="button"
+                onClick={() => {
+                  setExperience(lvl.value);
+                  setPage(1);
+                }}
+                className={`px-3 py-1 rounded-full border transition ${
+                  experience === lvl.value
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 font-semibold shadow-2xs'
+                    : 'bg-indigo-900/60 text-indigo-200 border-indigo-700/50 hover:bg-indigo-800'
+                }`}
+              >
+                {lvl.shortLabel}
               </button>
             ))}
           </div>
@@ -310,7 +368,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          {(search || location || jobType) && (
+          {(search || location || jobType || experience) && (
             <button
               onClick={handleClearFilters}
               className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold underline self-start sm:self-center"

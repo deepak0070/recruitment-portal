@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../common/Badge';
-import { MapPin, DollarSign, Clock, ArrowRight } from 'lucide-react';
+import { MapPin, DollarSign, Clock, ArrowRight, Award } from 'lucide-react';
 
 export default function JobCard({ job }) {
   const formattedDate = new Date(job.created_at).toLocaleDateString(undefined, {
@@ -20,11 +20,17 @@ export default function JobCard({ job }) {
           <Badge status={job.job_type} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-500 dark:text-slate-400 mb-3">
+        <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs text-slate-500 dark:text-slate-400 mb-3">
           <div className="flex items-center gap-1">
             <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             <span>{job.location}</span>
           </div>
+          {job.experience_level && (
+            <div className="inline-flex items-center gap-1 font-medium text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 px-2 py-0.5 rounded-md">
+              <Award className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+              <span>{job.experience_level}</span>
+            </div>
+          )}
           {job.salary_range && (
             <div className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-200">
               <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
